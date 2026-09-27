@@ -10,7 +10,7 @@
 // kept out of this function so the core ranking logic stays testable on
 // its own first.
 
-import { createClient } from '@/utils/supabase/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { embed } from '@/lib/embeddings'
 
 type StudentProfile = {
@@ -48,9 +48,7 @@ function toCompatibilityLabel(similarity: number): 'strong' | 'moderate' | 'expl
   return 'exploratory'
 }
 
-export async function generateMatchesForStudent(studentProfileId: string) {
-  const supabase = await createClient()
-
+export async function generateMatchesForStudent(studentProfileId: string, supabase: SupabaseClient) {
   const { data: profile, error: profileError } = await supabase
     .from('student_profiles')
     .select('id, major, academic_year, coursework, technical_skills, research_interests, career_goals')
