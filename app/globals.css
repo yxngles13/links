@@ -1,26 +1,247 @@
-@import "tailwindcss";
+/* Links design preset: paste below your existing @import "tailwindcss"; line if you have one.
+   Replace any default body/:root rules that came with create-next-app. */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Brand */
+  --links-primary: #4f7bf7;
+  --links-secondary: #2b3a9e;
+  --links-primary-hover: #3f67e0;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Tints and surfaces */
+  --links-tint-1: #dce6ff; /* selected, strong fit */
+  --links-tint-2: #eef2fd; /* soft fill */
+  --links-tint-3: #e4e8f4; /* neutral chip */
+  --links-surface: #f1f4fd; /* panels */
+  --links-bg: #ffffff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Text */
+  --links-text: #131316;
+  --links-text-muted: #5b6584;
+  --links-text-faint: #6b7595;
+  --links-on-dark: #ffffff;
+  --links-on-dark-muted: rgba(255, 255, 255, 0.65);
+  --links-accent-on-dark: #a9c0ff;
+
+  /* Hero gradient */
+  --links-hero-gradient: linear-gradient(
+    180deg,
+    #f2f8ff 0%,
+    #e3ecfc 35%,
+    #cbd9fa 75%,
+    #c2d1f8 100%
+  );
+
+  /* Shape */
+  --links-radius-card: 24px;
+  --links-radius-card-lg: 28px;
+  --links-radius-inner: 16px;
+  --links-radius-pill: 999px;
+
+  /* Type (variables are set by next/font, with fallbacks) */
+  --links-font-display: var(--font-inter), "Inter", system-ui, sans-serif;
+  --links-font-body: var(--font-source-sans), "Source Sans 3", "Source Sans Pro", system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--links-bg);
+  color: var(--links-text);
+  font-family: var(--links-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------- Type ---------- */
+.l-display {
+  font-family: var(--links-font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.l-h1 { font-family: var(--links-font-display); font-weight: 800; font-size: clamp(34px, 5.2vw, 60px); line-height: 1.15; letter-spacing: -0.025em; }
+.l-h2 { font-family: var(--links-font-display); font-weight: 800; font-size: clamp(28px, 3.6vw, 40px); letter-spacing: -0.02em; }
+.l-h3 { font-family: var(--links-font-display); font-weight: 800; font-size: 20px; }
+.l-body { font-size: 14px; font-weight: 500; line-height: 1.6; color: var(--links-text-muted); }
+.l-eyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--links-text-faint);
+}
+
+/* ---------- Buttons ---------- */
+.l-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 26px;
+  border: none;
+  border-radius: var(--links-radius-pill);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+}
+.l-btn:hover { transform: translateY(-1px); }
+.l-btn-primary { background: var(--links-primary); color: #fff; }
+.l-btn-primary:hover { background: var(--links-primary-hover); }
+.l-btn-dark { background: var(--links-secondary); color: #fff; }
+.l-btn-soft { background: var(--links-surface); color: var(--links-secondary); }
+.l-btn-white { background: #fff; color: var(--links-text); }
+
+/* ---------- Layout ---------- */
+.l-page {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: clamp(12px, 2vw, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.l-hero { background: var(--links-hero-gradient); }
+
+/* Pill nav: dark navy app nav, or add .l-nav-light for the landing page */
+.l-nav {
+  min-height: 64px;
+  box-sizing: border-box;
+  padding: 10px clamp(16px, 2.5vw, 28px);
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--links-secondary);
+  color: var(--links-on-dark);
+  border-radius: var(--links-radius-pill);
+}
+.l-nav-light { background: #fff; color: var(--links-text); min-height: 80px; }
+.l-nav a { font-size: 13.5px; font-weight: 700; opacity: 0.65; }
+.l-nav a[aria-current="page"] {
+  opacity: 1;
+  padding: 8px 16px;
+  border-radius: var(--links-radius-pill);
+  background: rgba(255, 255, 255, 0.12);
+}
+.l-nav-light a { opacity: 1; font-size: 15px; font-weight: 600; }
+
+/* ---------- Cards ---------- */
+.l-card {
+  background: #fff;
+  border-radius: var(--links-radius-card);
+  padding: clamp(16px, 2.2vw, 24px);
+  box-sizing: border-box;
+  transition: transform 0.1s;
+}
+a.l-card:hover { transform: translateY(-2px); }
+.l-card-tint { background: var(--links-tint-1); }
+.l-card-soft { background: var(--links-surface); }
+.l-card-dark { background: var(--links-secondary); color: var(--links-on-dark); }
+.l-card-dark .l-eyebrow { color: var(--links-accent-on-dark); }
+
+/* ---------- Chips and status ---------- */
+.l-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 14px;
+  border-radius: var(--links-radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--links-tint-2);
+  color: var(--links-primary-hover);
+}
+.l-chip-strong { background: var(--links-tint-1); color: var(--links-secondary); }
+.l-chip-neutral { background: var(--links-tint-3); color: #4b5578; }
+
+/* ---------- Avatar ---------- */
+.l-avatar {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--links-radius-inner);
+  background: var(--links-secondary);
+  color: #fff;
+  font-family: var(--links-font-display);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+/* ---------- Form fields ---------- */
+.l-input,
+.l-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 1.5px solid transparent;
+  border-radius: var(--links-radius-inner);
+  background: var(--links-surface);
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--links-text);
+}
+.l-input:focus,
+.l-textarea:focus {
+  outline: none;
+  border-color: var(--links-primary);
+  background: #fff;
+}
+
+/* ---------- App layout (main column + sidebar) ---------- */
+.l-page-title {
+  font-family: var(--links-font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: clamp(26px, 3.4vw, 38px);
+  line-height: 1.15;
+}
+.l-layout { flex-grow: 1; display: flex; gap: clamp(16px, 2vw, 24px); align-items: flex-start; }
+.l-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.l-side { width: clamp(260px, 24vw, 330px); flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
+.l-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Auto-fitting card grid: 3 across on desktop, 2 on tablet, 1 on phone */
+.l-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: clamp(16px, 2vw, 28px); }
+
+@media (max-width: 1000px) {
+  .l-layout { flex-direction: column; }
+  .l-side { width: 100%; }
+}
+@media (max-width: 560px) {
+  .l-btn { width: 100%; }
+}
+
+/* ---------- Forms ---------- */
+.l-field { display: flex; flex-direction: column; gap: 8px; }
+.l-label { font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--links-text-faint); }
+.l-hint { margin: 0; font-size: 13px; color: var(--links-text-faint); }
+.l-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; }
+.l-choices { display: flex; flex-wrap: wrap; gap: 10px; }
+.l-choice { position: relative; }
+.l-choice input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.l-choice span {
+  display: inline-flex; align-items: center; height: 42px; padding: 0 20px;
+  border-radius: var(--links-radius-pill); background: var(--links-surface);
+  font-size: 14px; font-weight: 700; color: var(--links-secondary); transition: background 0.15s;
+}
+.l-choice input:checked + span { background: var(--links-secondary); color: #fff; }
+.l-choice input:focus-visible + span { outline: 2px solid var(--links-primary); outline-offset: 2px; }
+
+/* Onboarding: intro column + form card */
+.l-onboard { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 56px); align-items: start; padding: clamp(8px, 3vw, 40px) clamp(0px, 2vw, 24px); }
+.l-onboard-intro { position: sticky; top: 24px; }
+@media (max-width: 900px) {
+  .l-onboard { grid-template-columns: 1fr; }
+  .l-onboard-intro { position: static; }
 }
