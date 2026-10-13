@@ -2,16 +2,13 @@
 //
 // The live counterpart to what the seed script does for professors:
 // turn a student's onboarding answers into a vector, ask the database
-// which opportunities are closest to it, and cache the results.
-//
-// What this does NOT do yet: generate the human-readable explanation,
-// suggested questions, or outreach draft for each match. Those columns
-// are left null here — that's a separate step (an LLM call), deliberately
-// kept out of this function so the core ranking logic stays testable on
-// its own first.
+// which opportunities are closest to it, and cache the results —
+// including the generated explanation, suggested questions, and outreach
+// draft for each match (see lib/generate-match-content.ts).
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { embed } from '@/lib/embeddings'
+import { generateMatchContent } from '@/lib/generate-match-content'
 
 type StudentProfile = {
   id: string
@@ -81,16 +78,30 @@ export async function generateMatchesForStudent(studentProfileId: string, supaba
     throw new Error(`Matching query failed: ${matchError.message}`)
   }
 
-  const rows = matches.map((m: { opportunity_id: string; similarity: number }) => ({
-    student_profile_id: studentProfileId,
-    opportunity_id: m.opportunity_id,
-    similarity_score: m.similarity,
-    compatibility_label: toCompatibilityLabel(m.similarity),
-    // Filled in by a later step — see the note at the top of this file.
-    explanation: null,
-    suggested_questions: null,
-    outreach_draft: null,
-  }))
+  const rows = []
+  for (const m of matches as {
+    opportunity_id: string
+    professor_name: string
+    department: string | null
+    lab_name: string | null
+    project_description: string | null
+    similarity: number
+  }[]) {
+    // Sequential, not Promise.all — deliberately gentle on Groq's free-tier
+    // rate limit (30 requests/minute shared across your whole account), and
+    // it means one failed generation doesn't take the others down with it.
+    const content = await generateMatchContent(profile, m)
+
+    rows.push({
+      student_profile_id: studentProfileId,
+      opportunity_id: m.opportunity_id,
+      similarity_score: m.similarity,
+      compatibility_label: toCompatibilityLabel(m.similarity),
+      explanation: content.explanation,
+      suggested_questions: content.suggested_questions,
+      outreach_draft: content.outreach_draft,
+    })
+  }
 
   const { error: insertError } = await supabase
     .from('match_recommendations')
