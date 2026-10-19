@@ -4,6 +4,7 @@
 // get their own two-item nav.
 import Link from 'next/link'
 import CreditsBadge from '@/components/CreditsBadge'
+import FeedbackSurvey from '@/components/FeedbackSurvey'
 
 type Tab = 'home' | 'research' | 'network' | 'mentors' | 'profile' | 'mentor-dashboard' | 'mentor-profile'
 
@@ -28,6 +29,7 @@ export default function AppNav({ active = 'home' }: { active?: Tab }) {
           <>
             <NavLink href="/mentor" active={active === 'mentor-dashboard'}>Dashboard</NavLink>
             <NavLink href="/mentor/profile" active={active === 'mentor-profile'}>My profile</NavLink>
+            <FeedbackSurvey />
           </>
         ) : (
           <>
@@ -36,6 +38,7 @@ export default function AppNav({ active = 'home' }: { active?: Tab }) {
             <NavLink href="/network" active={active === 'network'}>Network</NavLink>
             <NavLink href="/mentors" active={active === 'mentors'}>Mentors</NavLink>
             <NavLink href="/profile" active={active === 'profile'}>Profile</NavLink>
+            <FeedbackSurvey />
             <CreditsBadge />
           </>
         )}
