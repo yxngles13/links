@@ -3,13 +3,14 @@
 
 :root {
   --paper: #fafaf8; /* surfaces that sit on the background: dialog */
-  --bg-gradient: linear-gradient(180deg, #eaf5fd 0%, #c1d4fe 100%);
+  --bg: #ffffff; /* page background */
   --ink: #111111;
   --text-2: #333333; /* long-form body copy */
   --text-3: #555555; /* secondary copy, nav links */
   --muted: #6b6b66; /* labels, metadata */
   --faint: #999999; /* placeholders */
-  --line: #e3e2dd; /* hairlines between rows */
+  --secondary: #c1d4fe; /* soft blue from the old background; supports the accent */
+  --line: var(--secondary); /* hairlines between rows */
   --line-strong: #d4d3cc; /* outlines on buttons, inputs, drafts */
   --accent: #2b4bd8; /* the one thing that matters on a screen */
   --danger: #a01818;
@@ -24,13 +25,12 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { min-height: 100%; background: #c1d4fe; }
+html { min-height: 100%; background: var(--bg); }
 
 body {
   margin: 0;
   min-height: 100vh;
-  /* Fixed to the window so long pages keep the same top-to-bottom sweep. */
-  background: var(--bg-gradient) fixed;
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 15px;
