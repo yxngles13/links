@@ -9,14 +9,18 @@ import { login, signup } from './actions'
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; message?: string; mode?: string }>
+  searchParams: Promise<{ error?: string; message?: string; mode?: string; role?: string }>
 }) {
   const params = await searchParams
   const isSignup = params.mode === 'signup'
+  const isMentor = params.role === 'mentor'
+  const roleQuery = isMentor ? 'role=mentor' : ''
 
   return (
     <main style={{ maxWidth: 400, margin: '80px auto', padding: '0 24px' }}>
-      <h1 style={{ fontSize: 24, marginBottom: 24 }}>{isSignup ? 'Create account' : 'Sign in'}</h1>
+      <h1 style={{ fontSize: 24, marginBottom: 24 }}>
+        {isMentor ? (isSignup ? 'Create a mentor account' : 'Mentor sign in') : isSignup ? 'Create account' : 'Sign in'}
+      </h1>
 
       {params.error && (
         <p style={{ color: '#c00', marginBottom: 16, fontSize: 14 }}>{params.error}</p>
@@ -29,6 +33,7 @@ export default async function LoginPage({
         action={isSignup ? signup : login}
         style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
       >
+        <input type="hidden" name="role" value={isMentor ? 'mentor' : 'student'} />
         {isSignup && (
           <div>
             <label htmlFor="full_name" style={{ display: 'block', fontSize: 13, marginBottom: 4 }}>
@@ -89,9 +94,9 @@ export default async function LoginPage({
 
       <p style={{ marginTop: 20, fontSize: 13 }}>
         {isSignup ? (
-          <a href="/login">Already have an account? Sign in</a>
+          <a href={`/login${roleQuery ? `?${roleQuery}` : ''}`}>Already have an account? Sign in</a>
         ) : (
-          <a href="/login?mode=signup">Need an account? Sign up</a>
+          <a href={`/login?mode=signup${roleQuery ? `&${roleQuery}` : ''}`}>Need an account? Sign up</a>
         )}
       </p>
     </main>
