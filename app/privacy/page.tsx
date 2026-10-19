@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Privacy policy · Links' }
 
-const UPDATED = 'October 18, 2026'
+const UPDATED = 'October 19, 2026'
 const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -32,7 +32,11 @@ export default function PrivacyPage() {
         <p style={{ margin: 0 }}>Only what you give it, in your Links account:</p>
         <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
           <li>Your email, name and password (passwords are handled by our authentication provider and never visible to us).</li>
-          <li>Your student profile: major, year, interests, skills, coursework, goals and availability.</li>
+          <li>Your matching answers: major, year, interests, skills, coursework, goals and availability. Only you see these.</li>
+          <li>
+            Your public profile: photo, name, headline, personality answers, resume, and LinkedIn and GitHub links. Anyone signed in to Links
+            can see these.
+          </li>
           <li>Contacts you add to your network: name, role, company, how you met, tags, notes, an optional LinkedIn URL, and the interactions you log.</li>
           <li>Mentor profiles and mentorship requests, if you use mentor matching.</li>
         </ul>
