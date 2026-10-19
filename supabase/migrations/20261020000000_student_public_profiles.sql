@@ -20,7 +20,8 @@
 --   profile_embedding vector(384), created_at timestamptz, updated_at timestamptz
 
 create table if not exists public.student_public_profiles (
-  user_id uuid primary key references public.profiles (id) on delete cascade,
+  -- auth.users, not public.profiles: not every account has a profiles row.
+  user_id uuid primary key references auth.users (id) on delete cascade,
   full_name text,
   headline text,
   -- [{ "key": "lab_vibe", "answer": "…" }], keys from PROFILE_PROMPTS in lib/profile.ts
