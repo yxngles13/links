@@ -6,16 +6,21 @@ import CopyButton from '@/components/CopyButton'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser } from '@/lib/auth'
 import { needsFollowUp, timeAgo } from '@/lib/format'
-import { logInteraction } from '../actions'
+import LinkedInLink from '@/components/LinkedInLink'
+import { deleteContact, logInteraction, setContactLinkedIn } from '../actions'
 
 const INTERACTION_TYPES = ['LinkedIn message', 'Email', 'Call', 'Coffee chat', 'Meeting', 'Note']
 
-function Fact({ label, children }: { label: string; children: React.ReactNode }) {
+function LinkedInForm({ id, current }: { id: string; current: string | null }) {
   return (
-    <div>
-      <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.5)', marginBottom: 3, textTransform: 'uppercase' }}>{label}</div>
-      <div style={{ fontSize: 14, fontWeight: 600 }}>{children}</div>
-    </div>
+    <form action={setContactLinkedIn} style={{ display: 'flex', gap: 12, alignItems: 'flex-end', marginTop: current ? 10 : 0 }}>
+      <input type="hidden" name="contact_id" value={id} />
+      <div className="field" style={{ flex: 1 }}>
+        <label htmlFor={`li-${id}`}>LinkedIn</label>
+        <input id={`li-${id}`} name="linkedin_url" type="url" defaultValue={current ?? ''} placeholder="https://www.linkedin.com/in/…" className="input" style={{ fontSize: 14 }} />
+      </div>
+      <button type="submit" className="link" style={{ fontSize: 13 }}>Save</button>
+    </form>
   )
 }
 
@@ -50,109 +55,110 @@ export default async function ContactPage({
 
   const questions = (followUps ?? []).filter((f) => f.kind === 'question').map((f) => f.draft_text as string)
   const draft = (followUps ?? []).find((f) => f.kind === 'follow_up')?.draft_text as string | undefined
-  const roleLine = [contact.role, contact.company].filter(Boolean).join(', ')
+  const stale = needsFollowUp(contact.last_interaction_at)
 
   return (
-    <div className="l-page">
+    <>
       <AppNav active="network" />
+      <div className="shell">
+        <main className="main">
+          <Link href="/network" className="back">← Your network</Link>
+          <div className="eyebrow" style={{ margin: '22px 0 10px' }}>
+            Last contact {timeAgo(contact.last_interaction_at).toLowerCase()} · <span className={stale ? 'accent' : undefined}>{stale ? 'Time to follow up' : 'On track'}</span>
+          </div>
+          <h1 className="title-sm" style={{ marginBottom: 4 }}>{contact.full_name}</h1>
+          <div className="meta" style={{ marginBottom: 22, display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
+            <span>{[contact.role, contact.company].filter(Boolean).join(' · ')}</span>
+            <LinkedInLink url={contact.linkedin_url} name={contact.full_name} style={{ fontSize: 14 }} />
+          </div>
 
-      <div>
-        <Link href="/network" style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--links-text-faint)' }}>← Your network</Link>
-        <h1 className="l-page-title" style={{ margin: '10px 0 4px' }}>{contact.full_name}</h1>
-        {roleLine ? <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--links-text-faint)' }}>{roleLine}</div> : null}
-      </div>
-
-      <div className="l-layout">
-        <div className="l-main" style={{ gap: 18 }}>
-          {error ? <div className="l-card l-card-soft" style={{ color: '#a01818', fontWeight: 600 }}>{error}</div> : null}
-
-          {summary?.summary ? (
-            <div className="l-card l-card-tint" style={{ borderRadius: 22 }}>
-              <div className="l-eyebrow" style={{ color: 'var(--links-secondary)', marginBottom: 10 }}>Summary</div>
-              <p style={{ margin: 0, fontSize: 15, fontWeight: 500, lineHeight: 1.7 }}>{summary.summary}</p>
-            </div>
-          ) : null}
-
-          <section>
-            <h2 className="l-eyebrow" style={{ margin: '0 0 10px' }}>Timeline</h2>
-            {interactions?.length ? (
-              <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {interactions.map((i) => (
-                  <li key={i.id} className="l-card l-card-soft" style={{ borderRadius: 16, padding: '14px 18px' }}>
-                    <div style={{ fontSize: 11.5, fontWeight: 800, color: 'rgba(19,19,22,0.45)', marginBottom: 4, textTransform: 'uppercase' }}>
-                      {timeAgo(i.occurred_at)}{i.interaction_type ? ` · ${i.interaction_type}` : ''}
-                    </div>
-                    <div style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{i.notes}</div>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="l-body" style={{ margin: 0 }}>Nothing logged yet.</p>
-            )}
-          </section>
+          {error ? <div className="alert" role="alert">{error}</div> : null}
+          {summary?.summary ? <p className="lead" style={{ marginBottom: 26 }}>{summary.summary}</p> : null}
 
           {questions.length ? (
-            <section>
-              <h2 className="l-eyebrow" style={{ margin: '0 0 10px' }}>Questions for your next chat</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <section className="measure" style={{ marginBottom: 26 }}>
+              <h2 className="label" style={{ margin: '0 0 6px', fontWeight: 400 }}>Questions for your next chat</h2>
+              <ol className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 {questions.map((q, i) => (
-                  <div key={i} className="l-card l-card-soft" style={{ borderRadius: 16, padding: '15px 18px', fontSize: 14.5, fontWeight: 600, lineHeight: 1.5 }}>{q}</div>
+                  <li key={i} className="row row-tight numbered"><span className="num">{i + 1}</span>{q}</li>
                 ))}
-              </div>
+              </ol>
             </section>
           ) : null}
 
           {draft ? (
-            <section>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                <h2 className="l-eyebrow" style={{ margin: 0 }}>Follow-up draft</h2>
+            <section className="measure">
+              <div className="row-split" style={{ alignItems: 'baseline', marginBottom: 10 }}>
+                <h2 className="label" style={{ margin: 0, fontWeight: 400 }}>Follow-up draft</h2>
                 <CopyButton text={draft} />
               </div>
-              <div className="l-card l-card-soft" style={{ borderRadius: 20, padding: 20, fontSize: 14.5, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{draft}</div>
+              <div className="draft">{draft}</div>
             </section>
           ) : null}
+        </main>
 
-          <form action={logInteraction} className="l-card l-card-soft" style={{ borderRadius: 22, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <h2 className="l-eyebrow" style={{ margin: 0 }}>Log a new interaction</h2>
-            <input type="hidden" name="contact_id" value={contact.id} />
-            <div className="l-field">
-              <label htmlFor="interaction_type" className="l-label">Type</label>
-              <select id="interaction_type" name="interaction_type" className="l-input l-input-sm" style={{ background: '#fff' }} defaultValue="LinkedIn message">
-                {INTERACTION_TYPES.map((t) => <option key={t}>{t}</option>)}
-              </select>
-            </div>
-            <div className="l-field">
-              <label htmlFor="notes" className="l-label">What happened?</label>
-              <textarea id="notes" name="notes" rows={3} required placeholder="Call, message, coffee chat…" className="l-textarea" style={{ background: '#fff', resize: 'vertical' }} />
-            </div>
-            <SubmitButton pendingText="Saving and updating the summary…">Save interaction</SubmitButton>
-          </form>
-        </div>
+        <aside className="aside" style={{ width: 340 }}>
+          <div className="label" style={{ marginBottom: 12 }}>Timeline</div>
+          {interactions?.length ? (
+            <ol className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              {interactions.map((i) => (
+                <li key={i.id} className="row row-tight">
+                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>{timeAgo(i.occurred_at)}{i.interaction_type ? ` · ${i.interaction_type}` : ''}</div>
+                  <div style={{ fontSize: 14, lineHeight: 1.5, marginTop: 3, whiteSpace: 'pre-wrap' }}>{i.notes}</div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="body-copy" style={{ fontSize: 14 }}>Nothing logged yet.</p>
+          )}
 
-        <aside className="l-side">
-          <div className="l-card l-card-dark" style={{ borderRadius: 22, padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div className="l-eyebrow">Contact info</div>
-            {roleLine ? <Fact label="Role">{roleLine}</Fact> : null}
-            {contact.met_context ? <Fact label="How you met">{contact.met_context}</Fact> : null}
-            <Fact label="Last contact">
-              {timeAgo(contact.last_interaction_at)}
-              {needsFollowUp(contact.last_interaction_at) ? ' · time to follow up' : ''}
-            </Fact>
-            {contact.tags?.length ? (
-              <Fact label="Tags">
-                <span style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {contact.tags.map((t: string) => <span key={t} className="l-chip l-chip-sm l-chip-on-dark">{t}</span>)}
-                </span>
-              </Fact>
-            ) : null}
-            {contact.linkedin_url ? (
-              <a href={contact.linkedin_url} target="_blank" rel="noreferrer" style={{ fontSize: 13, fontWeight: 800, color: 'var(--links-accent-on-dark)' }}>
-                View LinkedIn →
-              </a>
-            ) : null}
+          <details className="details" style={{ marginTop: 28 }} open={!!error}>
+            <summary className="btn">Log a new interaction</summary>
+            <form action={logInteraction} className="form" style={{ gap: 16, marginTop: 20 }}>
+              <input type="hidden" name="contact_id" value={contact.id} />
+              <div className="field">
+                <label htmlFor="interaction_type">Type</label>
+                <select id="interaction_type" name="interaction_type" className="input" defaultValue="LinkedIn message">
+                  {INTERACTION_TYPES.map((t) => <option key={t}>{t}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="notes">What happened</label>
+                <textarea id="notes" name="notes" rows={3} required placeholder="Call, message, coffee chat…" className="input" style={{ fontSize: 15 }} />
+              </div>
+              <SubmitButton className="btn btn-block" pendingText="Saving and updating the summary…">Save interaction</SubmitButton>
+            </form>
+          </details>
+
+          <div className="label" style={{ margin: '32px 0 8px' }}>Contact info</div>
+          <div className="rows">
+            {contact.met_context ? <div className="row row-tight row-split" style={{ fontSize: 14 }}><span className="muted">Met via</span>{contact.met_context}</div> : null}
+            {contact.tags?.length ? <div className="row row-tight row-split" style={{ fontSize: 14 }}><span className="muted">Tags</span>{contact.tags.join(', ')}</div> : null}
+            <div className="row row-tight" id="linkedin">
+              {contact.linkedin_url ? (
+                <div className="row-split" style={{ fontSize: 14 }}>
+                  <LinkedInLink url={contact.linkedin_url} name={contact.full_name} />
+                  <details className="details">
+                    <summary className="link-quiet" style={{ fontSize: 13 }}>Change</summary>
+                    <LinkedInForm id={contact.id} current={contact.linkedin_url} />
+                  </details>
+                </div>
+              ) : (
+                <LinkedInForm id={contact.id} current={null} />
+              )}
+            </div>
           </div>
+
+          <details className="details" style={{ marginTop: 32 }}>
+            <summary className="link-quiet" style={{ fontSize: 13 }}>Delete contact</summary>
+            <form action={deleteContact} style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
+              <input type="hidden" name="contact_id" value={contact.id} />
+              <p className="hint">Removes {contact.full_name} and their whole timeline. This can&apos;t be undone.</p>
+              <button type="submit" className="btn btn-sm btn-danger">Delete for good</button>
+            </form>
+          </details>
         </aside>
       </div>
-    </div>
+    </>
   )
 }

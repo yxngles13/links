@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth'
 import { embed } from '@/lib/embeddings'
-import { toArray } from '@/lib/format'
+import { httpUrl, toArray } from '@/lib/format'
 import { getOwnMentorProfile, mentorEmbeddingText } from '@/lib/mentors'
 
 export async function saveMentorProfile(formData: FormData) {
@@ -14,6 +14,7 @@ export async function saveMentorProfile(formData: FormData) {
 
   const fullName = String(formData.get('full_name') ?? '').trim()
   if (!fullName) redirect('/mentor/profile?error=Name is required')
+  const existing = await getOwnMentorProfile(supabase, user.id)
 
   // Checkbox topics plus anything typed in "Other topics".
   const topics = Array.from(new Set([...formData.getAll('mentor_topics').map(String), ...toArray(formData.get('other_topics'))]))
@@ -29,11 +30,19 @@ export async function saveMentorProfile(formData: FormData) {
     availability: String(formData.get('availability') ?? '').trim() || null,
     preferred_format: String(formData.get('preferred_format') ?? '').trim() || null,
   }
+  const linkedinUrl = httpUrl(formData.get('linkedin_url'))
+  if (String(formData.get('linkedin_url') ?? '').trim() && !linkedinUrl) {
+    redirect('/mentor/profile?error=' + encodeURIComponent('LinkedIn link should start with https://'))
+  }
 
   const { error } = await supabase.from('mentor_profiles').upsert(
     {
       user_id: user.id,
       ...fields,
+      // Once the linkedin_url migration has run, the column comes back on the
+      // existing row and a blank field clears it. Before that, it's only sent
+      // when filled in, so saving a profile without one still works.
+      ...(linkedinUrl || (existing && 'linkedin_url' in existing) ? { linkedin_url: linkedinUrl } : {}),
       profile_embedding: await embed(mentorEmbeddingText(fields)),
       updated_at: new Date().toISOString(),
     },

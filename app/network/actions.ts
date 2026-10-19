@@ -4,7 +4,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireUser, displayName } from '@/lib/auth'
-import { toArray } from '@/lib/format'
+import { httpUrl, toArray } from '@/lib/format'
 import { createContact, recordInteraction } from '@/lib/network'
 
 function fail(path: string, message: string): never {
@@ -75,4 +75,34 @@ export async function logInteraction(formData: FormData) {
   revalidatePath('/network')
   revalidatePath(`/network/${contactId}`)
   redirect(`/network/${contactId}`)
+}
+
+export async function deleteContact(formData: FormData) {
+  const { supabase } = await requireUser()
+  const contactId = String(formData.get('contact_id') ?? '')
+  // RLS limits deletes to the user's own contacts; the timeline, summary
+  // and follow-up drafts cascade with it.
+  const { error } = await supabase.from('network_contacts').delete().eq('id', contactId)
+  if (error) fail(`/network/${contactId}`, error.message)
+
+  revalidatePath('/network')
+  redirect('/network')
+}
+
+export async function setContactLinkedIn(formData: FormData) {
+  const { supabase } = await requireUser()
+  const contactId = String(formData.get('contact_id') ?? '')
+  const raw = String(formData.get('linkedin_url') ?? '').trim()
+  const url = httpUrl(raw)
+  if (raw && !url) fail(`/network/${contactId}`, 'LinkedIn link should start with https://')
+
+  // RLS limits updates to the user's own contacts. Blank clears the link.
+  const { error } = await supabase
+    .from('network_contacts')
+    .update({ linkedin_url: url, updated_at: new Date().toISOString() })
+    .eq('id', contactId)
+  if (error) fail(`/network/${contactId}`, error.message)
+
+  revalidatePath('/network')
+  revalidatePath(`/network/${contactId}`)
 }

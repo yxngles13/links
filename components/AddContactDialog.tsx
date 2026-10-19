@@ -1,7 +1,7 @@
 'use client'
 // components/AddContactDialog.tsx
-// The "+ Add to network" quick-add popup. A native <dialog> gives focus
-// trapping, Escape-to-close and a backdrop for free.
+// The "Add to network" quick-add. A native <dialog> gives focus trapping,
+// Escape-to-close and a backdrop for free.
 import { useRef } from 'react'
 import { addContact } from '@/app/network/actions'
 import SubmitButton from '@/components/SubmitButton'
@@ -12,8 +12,8 @@ export default function AddContactDialog({ openOnLoad = false }: { openOnLoad?: 
 
   return (
     <>
-      <button type="button" className="l-btn l-btn-primary" style={{ height: 44 }} onClick={() => ref.current?.showModal()}>
-        + Add contact
+      <button type="button" className="btn" onClick={() => ref.current?.showModal()}>
+        Add contact
       </button>
 
       <dialog
@@ -21,40 +21,37 @@ export default function AddContactDialog({ openOnLoad = false }: { openOnLoad?: 
           ref.current = el
           if (el && openOnLoad && !el.open) el.showModal()
         }}
-        className="l-dialog"
+        className="dialog"
         aria-labelledby="add-contact-title"
       >
-        <div className="l-dialog-head">
-          <h2 id="add-contact-title" className="l-display" style={{ margin: 0, fontSize: 15 }}>+ Add to network</h2>
-          <button type="button" className="l-icon-btn" aria-label="Close" onClick={() => ref.current?.close()}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
+        <div className="row-split" style={{ alignItems: 'baseline', marginBottom: 24 }}>
+          <h2 id="add-contact-title" className="serif" style={{ margin: 0, fontSize: 34 }}>Add to network</h2>
+          <button type="button" className="link-quiet" style={{ fontSize: 13 }} onClick={() => ref.current?.close()}>
+            Close
           </button>
         </div>
 
-        <form action={addContact} className="l-dialog-body">
-          <div className="l-field">
-            <label htmlFor="c-name" className="l-label">Name</label>
-            <input id="c-name" name="full_name" required placeholder="Priya Nair" className="l-input l-input-sm" />
-          </div>
-
-          <div className="l-form-row" style={{ gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div className="l-field">
-              <label htmlFor="c-role" className="l-label">Role</label>
-              <input id="c-role" name="role" placeholder="Product Manager" className="l-input l-input-sm" />
+        <form action={addContact} className="form" style={{ gap: 18 }}>
+          <div className="form-row" style={{ gap: 18 }}>
+            <div className="field">
+              <label htmlFor="c-name">Name</label>
+              <input id="c-name" name="full_name" required placeholder="Priya Nair" className="input" />
             </div>
-            <div className="l-field">
-              <label htmlFor="c-company" className="l-label">Company</label>
-              <input id="c-company" name="company" placeholder="Notion" className="l-input l-input-sm" />
+            <div className="field">
+              <label htmlFor="c-role">Role</label>
+              <input id="c-role" name="role" placeholder="Product Manager" className="input" />
             </div>
           </div>
+          <div className="field">
+            <label htmlFor="c-company">Company</label>
+            <input id="c-company" name="company" placeholder="Notion" className="input" />
+          </div>
 
-          <fieldset className="l-field" style={{ border: 'none', padding: 0, margin: 0 }}>
-            <legend className="l-label" style={{ marginBottom: 8 }}>How you met</legend>
-            <div className="l-choices" style={{ gap: 6 }}>
+          <fieldset className="field">
+            <legend>How you met</legend>
+            <div className="choices choices-sm">
               {MET_OPTIONS.map((m, i) => (
-                <label key={m} className="l-choice l-choice-sm">
+                <label key={m} className="choice">
                   <input type="radio" name="met_context" value={m} defaultChecked={i === 0} />
                   <span>{m}</span>
                 </label>
@@ -62,23 +59,22 @@ export default function AddContactDialog({ openOnLoad = false }: { openOnLoad?: 
             </div>
           </fieldset>
 
-          <div className="l-field">
-            <label htmlFor="c-tags" className="l-label">Tags</label>
-            <input id="c-tags" name="tags" placeholder="Product, Alumni" className="l-input l-input-sm" />
-            <p className="l-hint" style={{ fontSize: 12 }}>Separate tags with commas.</p>
+          <div className="field">
+            <label htmlFor="c-tags">Tags</label>
+            <input id="c-tags" name="tags" placeholder="Product, Alumni" className="input" />
+          </div>
+          <div className="field">
+            <label htmlFor="c-linkedin">LinkedIn URL (optional)</label>
+            <input id="c-linkedin" name="linkedin_url" type="url" placeholder="https://linkedin.com/in/…" className="input" />
+          </div>
+          <div className="field">
+            <label htmlFor="c-notes">Notes</label>
+            <textarea id="c-notes" name="notes" rows={2} placeholder="What did you talk about?" className="input" />
           </div>
 
-          <div className="l-field">
-            <label htmlFor="c-linkedin" className="l-label">LinkedIn URL (optional)</label>
-            <input id="c-linkedin" name="linkedin_url" type="url" placeholder="https://linkedin.com/in/…" className="l-input l-input-sm" />
+          <div style={{ marginTop: 6 }}>
+            <SubmitButton className="btn" pendingText="Saving and drafting a follow-up…">Save contact</SubmitButton>
           </div>
-
-          <div className="l-field">
-            <label htmlFor="c-notes" className="l-label">Notes</label>
-            <textarea id="c-notes" name="notes" rows={3} placeholder="What did you talk about? Anything to remember?" className="l-textarea l-input-sm" style={{ resize: 'vertical' }} />
-          </div>
-
-          <SubmitButton pendingText="Saving and drafting a follow-up…">Save contact</SubmitButton>
         </form>
       </dialog>
     </>

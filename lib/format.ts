@@ -58,3 +58,10 @@ export function toArray(value: FormDataEntryValue | null): string[] {
     .map((s) => s.trim())
     .filter(Boolean)
 }
+
+// Only http(s) links are ever stored or rendered: these end up in an
+// <a href>, and a "javascript:" URL there would run in the user's session.
+export function httpUrl(value: unknown): string | null {
+  const v = typeof value === 'string' ? value.trim() : ''
+  return /^https?:\/\/\S+$/i.test(v) ? v.slice(0, 500) : null
+}
