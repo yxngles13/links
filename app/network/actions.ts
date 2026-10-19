@@ -5,7 +5,10 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireUser, displayName } from '@/lib/auth'
 import { httpUrl, toArray } from '@/lib/format'
+import { OUT_OF_CREDITS, spendCredit } from '@/lib/credits'
 import { createContact, recordInteraction } from '@/lib/network'
+import { rewriteDraft } from '@/lib/rewrite-draft'
+import { MAX_DRAFT_LENGTH } from '@/lib/rewrite-prompt'
 
 function fail(path: string, message: string): never {
   redirect(`${path}${path.includes('?') ? '&' : '?'}error=${encodeURIComponent(message)}`)
@@ -104,5 +107,51 @@ export async function setContactLinkedIn(formData: FormData) {
   if (error) fail(`/network/${contactId}`, error.message)
 
   revalidatePath('/network')
+  revalidatePath(`/network/${contactId}`)
+}
+
+// Writes the contact's follow-up draft, replacing the current one.
+async function setFollowUpDraft(supabase: Awaited<ReturnType<typeof requireUser>>['supabase'], contactId: string, text: string) {
+  await supabase.from('network_follow_ups').delete().eq('contact_id', contactId).eq('kind', 'follow_up')
+  if (!text.trim()) return
+  const { error } = await supabase.from('network_follow_ups').insert({ contact_id: contactId, kind: 'follow_up', draft_text: text })
+  if (error) fail(`/network/${contactId}`, error.message)
+}
+
+// Hand edits to the follow-up draft. Free: no AI involved. The next logged
+// interaction writes a fresh draft over it, as before.
+export async function saveFollowUpDraft(formData: FormData) {
+  const { supabase } = await requireUser()
+  const contactId = String(formData.get('contact_id') ?? '')
+  // RLS limits this to the user's own contacts: the ownership check.
+  const { data: contact } = await supabase.from('network_contacts').select('id').eq('id', contactId).maybeSingle()
+  if (!contact) redirect('/network')
+
+  await setFollowUpDraft(supabase, contactId, String(formData.get('draft') ?? '').slice(0, MAX_DRAFT_LENGTH))
+  revalidatePath(`/network/${contactId}`)
+}
+
+// Rewrites the draft (as currently typed) from the student's instruction.
+// Costs an AI credit.
+export async function rewriteFollowUpDraft(formData: FormData) {
+  const { supabase, user } = await requireUser()
+  const contactId = String(formData.get('contact_id') ?? '')
+  const { data: contact } = await supabase
+    .from('network_contacts')
+    .select('id, full_name, role, company, met_context')
+    .eq('id', contactId)
+    .maybeSingle()
+  if (!contact) redirect('/network')
+
+  if (!(await spendCredit(supabase))) fail(`/network/${contactId}`, OUT_OF_CREDITS)
+  const who = [contact.role, contact.company].filter(Boolean).join(' at ')
+  const rewritten = await rewriteDraft({
+    draft: String(formData.get('draft') ?? ''),
+    instruction: String(formData.get('instruction') ?? ''),
+    context: `A follow-up message from the student (${displayName(user)}) to ${contact.full_name}${who ? `, ${who}` : ''}${contact.met_context ? `, whom they met via ${contact.met_context}` : ''}.`,
+  })
+  if (!rewritten) fail(`/network/${contactId}`, "Couldn't rewrite it right now. Your draft wasn't changed.")
+
+  await setFollowUpDraft(supabase, contactId, rewritten)
   revalidatePath(`/network/${contactId}`)
 }

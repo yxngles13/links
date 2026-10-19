@@ -7,6 +7,7 @@ import ProfileHeader from '@/components/ProfileHeader'
 import ProfileReminder from '@/components/ProfileReminder'
 import SubmitButton from '@/components/SubmitButton'
 import { displayName, requireUser } from '@/lib/auth'
+import { OUT_OF_CREDITS } from '@/lib/credits'
 import { MAX_ANSWER_LENGTH, MAX_HEADLINE_LENGTH, MAX_PROMPTS, PROFILE_PROMPTS } from '@/lib/profile'
 import { getPublicProfile, PROFILE_MIGRATION, signedFileUrls } from '@/lib/student-profile'
 import { saveAbout, saveMatchingAnswers } from './actions'
@@ -133,6 +134,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           </div>
           {saved === 'matching' ? (
             <p className="meta accent" role="status" style={{ marginTop: -12, marginBottom: 20 }}>Saved. Your matches are refreshing in the background.</p>
+          ) : null}
+          {saved === 'matching-nocredit' ? (
+            <p className="meta accent" role="status" style={{ marginTop: -12, marginBottom: 20 }}>
+              Saved. {OUT_OF_CREDITS} Save again then to refresh your matches.
+            </p>
           ) : null}
 
           <form action={saveMatchingAnswers} className="form">

@@ -2,10 +2,10 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import AppNav from '@/components/AppNav'
-import CopyButton from '@/components/CopyButton'
+import DraftEditor from '@/components/DraftEditor'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser } from '@/lib/auth'
-import { logMatchInteraction, toggleSaved } from '../actions'
+import { logMatchInteraction, rewriteOutreachDraft, saveOutreachDraft, toggleSaved } from '../actions'
 
 const LABEL_TEXT = { strong: 'Strong match', moderate: 'Good match', exploratory: 'Possible match' } as const
 
@@ -77,15 +77,16 @@ export default async function MatchDetailPage({
             </section>
           ) : null}
 
-          {match.outreach_draft ? (
-            <section className="measure">
-              <div className="row-split" style={{ alignItems: 'baseline', marginBottom: 10 }}>
-                <h2 className="label" style={{ margin: 0, fontWeight: 400 }}>Outreach draft</h2>
-                <CopyButton text={match.outreach_draft} />
-              </div>
-              <div className="draft">{match.outreach_draft}</div>
-            </section>
-          ) : null}
+          <section className="measure">
+            <DraftEditor
+              label="Outreach draft"
+              text={match.outreach_draft ?? ''}
+              idName="match_id"
+              idValue={match.id}
+              save={saveOutreachDraft}
+              rewrite={rewriteOutreachDraft}
+            />
+          </section>
         </main>
 
         <aside className="aside">

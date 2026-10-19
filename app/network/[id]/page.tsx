@@ -2,12 +2,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import AppNav from '@/components/AppNav'
-import CopyButton from '@/components/CopyButton'
+import DraftEditor from '@/components/DraftEditor'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser } from '@/lib/auth'
+import { creditsLeft, OUT_OF_CREDITS } from '@/lib/credits'
 import { needsFollowUp, timeAgo } from '@/lib/format'
 import LinkedInLink from '@/components/LinkedInLink'
-import { deleteContact, logInteraction, setContactLinkedIn } from '../actions'
+import { deleteContact, logInteraction, rewriteFollowUpDraft, saveFollowUpDraft, setContactLinkedIn } from '../actions'
 
 const INTERACTION_TYPES = ['LinkedIn message', 'Email', 'Call', 'Coffee chat', 'Meeting', 'Note']
 
@@ -34,6 +35,7 @@ export default async function ContactPage({
   const { id } = await params
   const { error } = await searchParams
   const { supabase } = await requireUser()
+  const credits = await creditsLeft(supabase)
 
   // RLS restricts every one of these to the signed-in user's own contacts.
   const [{ data: contact }, { data: interactions }, { data: summary }, { data: followUps }] = await Promise.all([
@@ -73,6 +75,11 @@ export default async function ContactPage({
           </div>
 
           {error ? <div className="alert" role="alert">{error}</div> : null}
+          {credits === 0 ? (
+            <p className="meta" role="status" style={{ marginBottom: 22 }}>
+              {OUT_OF_CREDITS} Anything you log still saves; the summary and draft below catch up tomorrow.
+            </p>
+          ) : null}
           {summary?.summary ? <p className="lead" style={{ marginBottom: 26 }}>{summary.summary}</p> : null}
 
           {questions.length ? (
@@ -86,15 +93,16 @@ export default async function ContactPage({
             </section>
           ) : null}
 
-          {draft ? (
-            <section className="measure">
-              <div className="row-split" style={{ alignItems: 'baseline', marginBottom: 10 }}>
-                <h2 className="label" style={{ margin: 0, fontWeight: 400 }}>Follow-up draft</h2>
-                <CopyButton text={draft} />
-              </div>
-              <div className="draft">{draft}</div>
-            </section>
-          ) : null}
+          <section className="measure">
+            <DraftEditor
+              label="Follow-up draft"
+              text={draft ?? ''}
+              idName="contact_id"
+              idValue={contact.id}
+              save={saveFollowUpDraft}
+              rewrite={rewriteFollowUpDraft}
+            />
+          </section>
         </main>
 
         <aside className="aside" style={{ width: 340 }}>

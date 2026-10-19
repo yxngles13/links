@@ -3,6 +3,7 @@
 // underlined. Students get Home / Research / Network / Mentors / Profile; mentor accounts
 // get their own two-item nav.
 import Link from 'next/link'
+import CreditsBadge from '@/components/CreditsBadge'
 
 type Tab = 'home' | 'research' | 'network' | 'mentors' | 'profile' | 'mentor-dashboard' | 'mentor-profile'
 
@@ -35,6 +36,7 @@ export default function AppNav({ active = 'home' }: { active?: Tab }) {
             <NavLink href="/network" active={active === 'network'}>Network</NavLink>
             <NavLink href="/mentors" active={active === 'mentors'}>Mentors</NavLink>
             <NavLink href="/profile" active={active === 'profile'}>Profile</NavLink>
+            <CreditsBadge />
           </>
         )}
       </nav>

@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { after } from 'next/server'
 import { requireUser } from '@/lib/auth'
+import { spendCredit } from '@/lib/credits'
 import { toArray } from '@/lib/format'
 import { generateMatchesForStudent } from '@/lib/matching'
 import { githubUrl, linkedinUrl, matchesFileType, MAX_HEADLINE_LENGTH, parsePromptAnswers, validateUpload } from '@/lib/profile'
@@ -102,12 +103,15 @@ export async function saveMatchingAnswers(formData: FormData) {
 
   revalidatePath('/', 'layout')
 
-  // First time: wait, so the student lands on matches that already exist
-  // (same as the old onboarding). After that, refresh in the background.
+  // First time: free, and waits so the student lands on matches that
+  // already exist (same as the old onboarding). After that, a refresh costs
+  // an AI credit and runs in the background; with none left the answers
+  // still save and matches refresh on a later save.
   if (!before) {
     await generateMatchesForStudent(profile!.id, supabase)
     redirect('/matches')
   }
+  if (!(await spendCredit(supabase))) redirect('/profile?saved=matching-nocredit#matching')
   after(() =>
     generateMatchesForStudent(profile!.id, supabase).catch((err) => console.error('Background match refresh failed:', err))
   )
