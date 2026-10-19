@@ -1,6 +1,6 @@
 // app/mentor/profile/page.tsx
 // Mentor sign-up, and later "My profile" for editing it. Same form both ways.
-import AppNav, { Logo } from '@/components/AppNav'
+import AppNav, { BrandBar } from '@/components/AppNav'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser, displayName } from '@/lib/auth'
 import { getOwnMentorProfile, MENTOR_TOPICS } from '@/lib/mentors'
@@ -16,93 +16,85 @@ export default async function MentorProfilePage({ searchParams }: { searchParams
   const otherTopics = (existing?.mentor_topics ?? []).filter((t) => !MENTOR_TOPICS.includes(t))
 
   return (
-    <div className="l-page">
-      {existing ? (
-        <AppNav active="mentor-profile" />
-      ) : (
-        <nav className="l-nav">
-          <Logo />
-          <span style={{ fontSize: 13.5, fontWeight: 700, opacity: 0.65 }}>Mentor sign-up</span>
-        </nav>
-      )}
-
-      <div className="l-onboard">
-        <div className="l-onboard-intro">
-          <h1 className="l-page-title" style={{ margin: '0 0 16px', fontSize: 'clamp(30px, 4vw, 44px)' }}>
-            {existing ? 'Your mentor profile' : 'Help a freshman skip a few years of figuring it out'}
+    <>
+      {existing ? <AppNav active="mentor-profile" /> : <BrandBar right="Mentor sign-up" />}
+      <div className="shell">
+        <div style={{ width: 460, maxWidth: '100%', flexShrink: 0, padding: '64px 48px 48px var(--gutter)' }}>
+          <div className="eyebrow" style={{ marginBottom: 20 }}>{existing ? 'Your mentor profile' : 'For CPP alumni and seniors'}</div>
+          <h1 className="title-sm" style={{ marginBottom: 20 }}>
+            Help a freshman skip a few years of <em className="accent">figuring it out</em>.
           </h1>
-          <p className="l-body" style={{ margin: '0 0 24px', fontSize: 16 }}>
-            Five minutes to set up your profile. We match you with students whose goals line up with what you know, not a random assignment.
+          <p className="body-copy" style={{ marginBottom: 28 }}>
+            Five minutes to set up. We match you with students whose goals line up with what you know, not a random assignment.
           </p>
-          <div className="l-card l-card-tint" style={{ borderRadius: 20, padding: 18 }}>
-            <div className="l-eyebrow" style={{ color: 'var(--links-secondary)', marginBottom: 6 }}>What this looks like</div>
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, lineHeight: 1.5, color: 'var(--links-secondary)' }}>
-              A student requests a chat, you accept on your own schedule. No ongoing commitment, and you can pause new requests any time.
-            </p>
-          </div>
+          <p className="body-copy" style={{ borderTop: '1px solid var(--line)', paddingTop: 14, fontSize: 13.5 }}>
+            A student requests a chat and you accept on your own schedule. No ongoing commitment, and you can pause requests any time.
+          </p>
         </div>
 
-        <form action={saveMentorProfile} className="l-card l-card-soft" style={{ borderRadius: 28, padding: 'clamp(20px, 3vw, 36px)', display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {error ? <div style={{ color: '#a01818', fontWeight: 600 }}>{error}</div> : null}
+        <form action={saveMentorProfile} className="main form" style={{ borderLeft: '1px solid var(--line)', maxWidth: 760 }}>
+          {error ? <div className="alert" role="alert">{error}</div> : null}
 
-          <div className="l-form-row">
-            <div className="l-field">
-              <label htmlFor="full_name" className="l-label">Full name</label>
-              <input id="full_name" name="full_name" required defaultValue={existing?.full_name ?? displayName(user)} className="l-input" style={{ background: '#fff' }} />
+          <div className="form-row">
+            <div className="field" style={{ gridColumn: 'span 1' }}>
+              <label htmlFor="full_name">Full name</label>
+              <input id="full_name" name="full_name" required defaultValue={existing?.full_name ?? displayName(user)} className="input" />
             </div>
-            <div className="l-field">
-              <label htmlFor="grad_year" className="l-label">CPP grad year</label>
-              <input id="grad_year" name="grad_year" type="number" min={1950} max={2040} placeholder="2023" defaultValue={existing?.grad_year ?? undefined} className="l-input" style={{ background: '#fff' }} />
+            <div className="field">
+              <label htmlFor="grad_year">CPP grad year</label>
+              <input id="grad_year" name="grad_year" type="number" min={1950} max={2040} placeholder="2023" defaultValue={existing?.grad_year ?? undefined} className="input" />
             </div>
           </div>
 
-          <div className="l-form-row">
-            <div className="l-field">
-              <label htmlFor="job_title" className="l-label">Current role</label>
-              <input id="job_title" name="job_title" placeholder="Software Engineer" defaultValue={existing?.job_title ?? ''} className="l-input" style={{ background: '#fff' }} />
+          <div className="form-row">
+            <div className="field">
+              <label htmlFor="job_title">Current role</label>
+              <input id="job_title" name="job_title" placeholder="Software Engineer" defaultValue={existing?.job_title ?? ''} className="input" />
             </div>
-            <div className="l-field">
-              <label htmlFor="company" className="l-label">Company</label>
-              <input id="company" name="company" placeholder="Datadog" defaultValue={existing?.company ?? ''} className="l-input" style={{ background: '#fff' }} />
+            <div className="field">
+              <label htmlFor="company">Company</label>
+              <input id="company" name="company" placeholder="Datadog" defaultValue={existing?.company ?? ''} className="input" />
             </div>
           </div>
 
-          <fieldset className="l-field" style={{ border: 'none', padding: 0, margin: 0 }}>
-            <legend className="l-label" style={{ marginBottom: 8 }}>What you can mentor on</legend>
-            <div className="l-choices">
+          <fieldset className="field">
+            <legend>What you can mentor on</legend>
+            <div className="choices">
               {MENTOR_TOPICS.map((t) => (
-                <label key={t} className="l-choice l-choice-sm">
+                <label key={t} className="choice">
                   <input type="checkbox" name="mentor_topics" value={t} defaultChecked={existing?.mentor_topics.includes(t)} />
-                  <span style={{ background: '#fff' }}>{t}</span>
+                  <span>{t}</span>
                 </label>
               ))}
             </div>
-            <input name="other_topics" aria-label="Other topics, comma separated" placeholder="Other topics, comma separated" defaultValue={otherTopics.join(', ')} className="l-input l-input-sm" style={{ background: '#fff', marginTop: 10 }} />
+            <input name="other_topics" aria-label="Other topics, comma separated" placeholder="Other topics, comma separated" defaultValue={otherTopics.join(', ')} className="input" style={{ marginTop: 12, fontSize: 15 }} />
           </fieldset>
 
-          <div className="l-field">
-            <label htmlFor="bio" className="l-label">Short bio</label>
-            <textarea id="bio" name="bio" rows={3} placeholder="What should a freshman know about you before reaching out?" defaultValue={existing?.bio ?? ''} className="l-textarea" style={{ background: '#fff', resize: 'vertical' }} />
+          <div className="field">
+            <label htmlFor="bio">Short bio</label>
+            <textarea id="bio" name="bio" rows={2} placeholder="What should a freshman know about you before reaching out?" defaultValue={existing?.bio ?? ''} className="input" />
           </div>
 
-          <div className="l-form-row">
-            <div className="l-field">
-              <label htmlFor="availability" className="l-label">Availability</label>
-              <select id="availability" name="availability" defaultValue={existing?.availability ?? AVAILABILITY[0]} className="l-input" style={{ background: '#fff' }}>
+          <div className="form-row">
+            <div className="field">
+              <label htmlFor="availability">Availability</label>
+              <select id="availability" name="availability" defaultValue={existing?.availability ?? AVAILABILITY[0]} className="input">
                 {AVAILABILITY.map((a) => <option key={a}>{a}</option>)}
               </select>
             </div>
-            <div className="l-field">
-              <label htmlFor="preferred_format" className="l-label">Preferred format</label>
-              <select id="preferred_format" name="preferred_format" defaultValue={existing?.preferred_format ?? FORMATS[0]} className="l-input" style={{ background: '#fff' }}>
+            <div className="field">
+              <label htmlFor="preferred_format">Preferred format</label>
+              <select id="preferred_format" name="preferred_format" defaultValue={existing?.preferred_format ?? FORMATS[0]} className="input">
                 {FORMATS.map((f) => <option key={f}>{f}</option>)}
               </select>
             </div>
           </div>
 
-          <SubmitButton pendingText="Saving…">{existing ? 'Save profile' : 'Create mentor profile'}</SubmitButton>
+          <div style={{ marginTop: 8 }}>
+            <SubmitButton pendingText="Saving…">{existing ? 'Save profile' : 'Create mentor profile →'}</SubmitButton>
+          </div>
         </form>
       </div>
-    </div>
+    </>
   )
 }

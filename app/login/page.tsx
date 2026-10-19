@@ -1,9 +1,11 @@
 // app/login/page.tsx
 //
-// One page, two forms (login + signup), toggled by query param — simplest
-// thing that works. Split into two routes later if it ever needs to feel
-// more polished; not worth it yet.
+// One page, two forms (sign in + sign up), toggled by ?mode=signup; ?role=mentor
+// switches the copy and where the user lands afterwards.
 
+import Link from 'next/link'
+import { BrandBar } from '@/components/AppNav'
+import SubmitButton from '@/components/SubmitButton'
 import { login, signup } from './actions'
 
 export default async function LoginPage({
@@ -16,89 +18,59 @@ export default async function LoginPage({
   const isMentor = params.role === 'mentor'
   const roleQuery = isMentor ? 'role=mentor' : ''
 
+  const heading = isMentor
+    ? isSignup
+      ? <>Share what you <em className="accent">know</em>.</>
+      : <>Welcome back, <em className="accent">mentor</em>.</>
+    : isSignup
+      ? <>Start with one <em className="accent">conversation</em>.</>
+      : <>Welcome <em className="accent">back</em>.</>
+
   return (
-    <main style={{ maxWidth: 400, margin: '80px auto', padding: '0 24px' }}>
-      <h1 style={{ fontSize: 24, marginBottom: 24 }}>
-        {isMentor ? (isSignup ? 'Create a mentor account' : 'Mentor sign in') : isSignup ? 'Create account' : 'Sign in'}
-      </h1>
-
-      {params.error && (
-        <p style={{ color: '#c00', marginBottom: 16, fontSize: 14 }}>{params.error}</p>
-      )}
-      {params.message && (
-        <p style={{ color: '#060', marginBottom: 16, fontSize: 14 }}>{params.message}</p>
-      )}
-
-      <form
-        action={isSignup ? signup : login}
-        style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
-      >
-        <input type="hidden" name="role" value={isMentor ? 'mentor' : 'student'} />
-        {isSignup && (
-          <div>
-            <label htmlFor="full_name" style={{ display: 'block', fontSize: 13, marginBottom: 4 }}>
-              Full name
-            </label>
-            <input
-              id="full_name"
-              name="full_name"
-              type="text"
-              required
-              style={{ width: '100%', padding: '8px 10px', border: '1px solid #ccc', borderRadius: 6 }}
-            />
-          </div>
-        )}
-
-        <div>
-          <label htmlFor="email" style={{ display: 'block', fontSize: 13, marginBottom: 4 }}>
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            style={{ width: '100%', padding: '8px 10px', border: '1px solid #ccc', borderRadius: 6 }}
-          />
+    <main>
+      <BrandBar right={isMentor ? 'Mentors' : undefined} />
+      <div className="shell">
+        <div className="main" style={{ maxWidth: 520, paddingTop: 72 }}>
+          <div className="eyebrow" style={{ marginBottom: 20 }}>{isSignup ? 'Create an account' : 'Sign in'}</div>
+          <h1 className="title-sm" style={{ marginBottom: 20 }}>{heading}</h1>
+          <p className="body-copy">
+            {isMentor
+              ? 'Mentor accounts see requests from CPP students and choose which ones to take.'
+              : 'Links is free for Cal Poly Pomona students and alumni.'}
+          </p>
         </div>
 
-        <div>
-          <label htmlFor="password" style={{ display: 'block', fontSize: 13, marginBottom: 4 }}>
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            minLength={6}
-            style={{ width: '100%', padding: '8px 10px', border: '1px solid #ccc', borderRadius: 6 }}
-          />
+        <div className="main" style={{ borderLeft: '1px solid var(--line)', paddingTop: 72, maxWidth: 640 }}>
+          {params.error ? <div className="alert" role="alert">{params.error}</div> : null}
+          {params.message ? <div className="notice" style={{ marginBottom: 24 }}>{params.message}</div> : null}
+
+          <form action={isSignup ? signup : login} className="form">
+            <input type="hidden" name="role" value={isMentor ? 'mentor' : 'student'} />
+            {isSignup ? (
+              <div className="field">
+                <label htmlFor="full_name">Full name</label>
+                <input id="full_name" name="full_name" type="text" required autoComplete="name" className="input" />
+              </div>
+            ) : null}
+            <div className="field">
+              <label htmlFor="email">Email</label>
+              <input id="email" name="email" type="email" required autoComplete="email" className="input" />
+            </div>
+            <div className="field">
+              <label htmlFor="password">Password</label>
+              <input id="password" name="password" type="password" required minLength={6} autoComplete={isSignup ? 'new-password' : 'current-password'} className="input" />
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 28, marginTop: 8 }}>
+              <SubmitButton pendingText={isSignup ? 'Creating account…' : 'Signing in…'}>{isSignup ? 'Create account' : 'Sign in'}</SubmitButton>
+              {isSignup ? (
+                <Link href={`/login${roleQuery ? `?${roleQuery}` : ''}`} className="link">I have an account</Link>
+              ) : (
+                <Link href={`/login?mode=signup${roleQuery ? `&${roleQuery}` : ''}`} className="link">Create an account</Link>
+              )}
+            </div>
+          </form>
         </div>
-
-        <button
-          type="submit"
-          style={{
-            marginTop: 8,
-            padding: '10px 16px',
-            background: '#111',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            cursor: 'pointer',
-          }}
-        >
-          {isSignup ? 'Sign up' : 'Sign in'}
-        </button>
-      </form>
-
-      <p style={{ marginTop: 20, fontSize: 13 }}>
-        {isSignup ? (
-          <a href={`/login${roleQuery ? `?${roleQuery}` : ''}`}>Already have an account? Sign in</a>
-        ) : (
-          <a href={`/login?mode=signup${roleQuery ? `&${roleQuery}` : ''}`}>Need an account? Sign up</a>
-        )}
-      </p>
+      </div>
     </main>
   )
 }

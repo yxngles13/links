@@ -1,18 +1,29 @@
 // app/matches/[id]/page.tsx
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { cookies } from 'next/headers'
-import { createClient } from '@/utils/supabase/server'
 import AppNav from '@/components/AppNav'
 import CopyButton from '@/components/CopyButton'
 import SubmitButton from '@/components/SubmitButton'
+import { requireUser } from '@/lib/auth'
 import { logMatchInteraction, toggleSaved } from '../actions'
 
-function Fact({ label, value }: { label: string; value: React.ReactNode }) {
+const LABEL_TEXT = { strong: 'Strong match', moderate: 'Good match', exploratory: 'Possible match' } as const
+
+type Opportunity = {
+  professor_name: string
+  department: string | null
+  lab_name: string | null
+  time_commitment_hours: number | null
+  prerequisites: string | null
+  preferred_contact_method: string | null
+  is_available: boolean | null
+}
+
+function Fact({ label, children, accent }: { label: string; children: React.ReactNode; accent?: boolean }) {
   return (
-    <div>
-      <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--links-on-dark-muted)', marginBottom: 3, textTransform: 'uppercase' }}>{label}</div>
-      <div style={{ fontSize: 14.5, fontWeight: 600 }}>{value}</div>
+    <div className="row row-tight fact">
+      <span>{label}</span>
+      <span style={{ fontSize: 15, color: accent ? 'var(--accent)' : undefined }}>{children}</span>
     </div>
   )
 }
@@ -26,111 +37,92 @@ export default async function MatchDetailPage({
 }) {
   const { id } = await params
   const { error } = await searchParams
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+  const { supabase } = await requireUser()
 
-  // Row Level Security already restricts this to the signed-in student's matches.
-  // `*` so this keeps working whether or not the saved_at migration has run.
+  // RLS restricts this to the signed-in student's matches. `*` so it keeps
+  // working whether or not the saved_at migration has run.
   const { data: match } = await supabase
     .from('match_recommendations')
-    .select(
-      `*,
-       opportunities ( professor_name, department, lab_name, project_description,
-                       time_commitment_hours, prerequisites, preferred_contact_method, is_available )`
-    )
+    .select(`*, opportunities ( professor_name, department, lab_name, time_commitment_hours, prerequisites, preferred_contact_method, is_available )`)
     .eq('id', id)
-    .single()
+    .maybeSingle()
 
   if (!match) notFound()
-  const opp = match.opportunities as {
-    professor_name: string
-    department: string | null
-    lab_name: string | null
-    project_description: string | null
-    time_commitment_hours: number | null
-    prerequisites: string | null
-    preferred_contact_method: string | null
-    is_available: boolean | null
-  } | null
+  const opp = match.opportunities as Opportunity | null
+  const fit = (match.compatibility_label ?? 'exploratory') as keyof typeof LABEL_TEXT
 
   return (
-    <div className="l-page">
+    <>
       <AppNav active="research" />
-      <div className="l-layout">
-        <div className="l-main">
-          <div>
-            <Link href="/matches" style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--links-text-faint)' }}>← All matches</Link>
-            <h1 className="l-page-title" style={{ margin: '10px 0 4px' }}>{opp?.professor_name}</h1>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--links-text-faint)' }}>
-              {opp?.department}{opp?.lab_name ? ` · ${opp.lab_name}` : ''}
-            </div>
+      <div className="shell">
+        <main className="main">
+          <Link href="/matches" className="back">← All matches</Link>
+          <div className="eyebrow accent" style={{ margin: '22px 0 10px' }}>
+            {Math.round((match.similarity_score ?? 0) * 100)} · {LABEL_TEXT[fit]}
           </div>
+          <h1 className="title-sm" style={{ marginBottom: 4 }}>{opp?.professor_name}</h1>
+          <div className="meta" style={{ marginBottom: 28 }}>{[opp?.lab_name, opp?.department].filter(Boolean).join(' · ')}</div>
 
-          {error ? <div className="l-card l-card-soft" style={{ color: '#a01818', fontWeight: 600 }}>{error}</div> : null}
-
-          {match.explanation ? (
-            <div className="l-card l-card-tint" style={{ borderRadius: 22 }}>
-              <div className="l-eyebrow" style={{ color: 'var(--links-secondary)', marginBottom: 10 }}>Briefing</div>
-              <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.7 }}>{match.explanation}</p>
-            </div>
-          ) : null}
+          {error ? <div className="alert" role="alert">{error}</div> : null}
+          {match.explanation ? <p className="lead" style={{ marginBottom: 32 }}>{match.explanation}</p> : null}
 
           {match.suggested_questions?.length ? (
-            <div>
-              <div className="l-eyebrow" style={{ marginBottom: 10 }}>Questions to ask</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <section className="measure" style={{ marginBottom: 32 }}>
+              <h2 className="label" style={{ margin: '0 0 6px', fontWeight: 400 }}>Questions to ask</h2>
+              <ol className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 {match.suggested_questions.map((q: string, i: number) => (
-                  <div key={i} className="l-card l-card-soft" style={{ borderRadius: 16, padding: '15px 18px', fontSize: 14.5, fontWeight: 600, lineHeight: 1.5 }}>{q}</div>
+                  <li key={i} className="row row-tight numbered"><span className="num">{i + 1}</span>{q}</li>
                 ))}
-              </div>
-            </div>
+              </ol>
+            </section>
           ) : null}
 
           {match.outreach_draft ? (
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                <div className="l-eyebrow">Outreach draft</div>
+            <section className="measure">
+              <div className="row-split" style={{ alignItems: 'baseline', marginBottom: 10 }}>
+                <h2 className="label" style={{ margin: 0, fontWeight: 400 }}>Outreach draft</h2>
                 <CopyButton text={match.outreach_draft} />
               </div>
-              <div className="l-card l-card-soft" style={{ borderRadius: 20, padding: 20, fontSize: 14.5, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                {match.outreach_draft}
-              </div>
-            </div>
+              <div className="draft">{match.outreach_draft}</div>
+            </section>
           ) : null}
-        </div>
+        </main>
 
-        <aside className="l-side">
-          <div className="l-card l-card-dark" style={{ borderRadius: 22, padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div className="l-eyebrow">Quick facts</div>
-            <Fact label="Department" value={opp?.department ?? 'n/a'} />
-            {opp?.time_commitment_hours ? <Fact label="Time commitment" value={`${opp.time_commitment_hours} hrs / week`} /> : null}
-            {opp?.prerequisites ? <Fact label="Prerequisites" value={opp.prerequisites} /> : null}
-            {opp?.preferred_contact_method ? <Fact label="Preferred contact" value={opp.preferred_contact_method} /> : null}
-            <Fact label="Available" value={opp?.is_available ? 'Yes' : 'Not currently'} />
+        <aside className="aside">
+          <div className="label" style={{ marginBottom: 8 }}>Quick facts</div>
+          <div className="rows" style={{ marginBottom: 32 }}>
+            {opp?.time_commitment_hours ? <Fact label="Time commitment">{opp.time_commitment_hours} hours a week</Fact> : null}
+            {opp?.prerequisites ? <Fact label="Prerequisites">{opp.prerequisites}</Fact> : null}
+            {opp?.preferred_contact_method ? <Fact label="Preferred contact">{opp.preferred_contact_method}</Fact> : null}
+            <Fact label="Availability" accent={!!opp?.is_available}>{opp?.is_available ? 'Taking students' : 'Ask to confirm'}</Fact>
           </div>
 
-          <form action={logMatchInteraction} className="l-card l-card-soft" style={{ borderRadius: 22, padding: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <form action={logMatchInteraction} className="form" style={{ gap: 14 }}>
             <input type="hidden" name="match_id" value={match.id} />
-            <label htmlFor="log-notes" className="l-label">Reached out?</label>
-            <select name="interaction_type" aria-label="How you reached out" className="l-input l-input-sm" style={{ background: '#fff' }} defaultValue="Email">
-              <option>Email</option>
-              <option>Office hours</option>
-              <option>Meeting</option>
-              <option>Reply received</option>
-            </select>
-            <textarea id="log-notes" name="notes" rows={3} required placeholder="Sent the outreach email, asked about the fall project…" className="l-textarea l-input-sm" style={{ background: '#fff', resize: 'vertical' }} />
-            <SubmitButton pendingText="Logging…">Log this interaction</SubmitButton>
-            <p className="l-hint" style={{ fontSize: 12 }}>Adds {opp?.professor_name} to your network with a follow-up draft.</p>
+            <div className="label">Reached out?</div>
+            <div className="field">
+              <label htmlFor="interaction_type">How</label>
+              <select id="interaction_type" name="interaction_type" className="input" defaultValue="Email">
+                <option>Email</option>
+                <option>Office hours</option>
+                <option>Meeting</option>
+                <option>Reply received</option>
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="log-notes">What happened</label>
+              <textarea id="log-notes" name="notes" rows={2} required placeholder="Sent the outreach email…" className="input" style={{ fontSize: 15 }} />
+            </div>
+            <SubmitButton className="btn btn-block" pendingText="Logging…">Log this interaction</SubmitButton>
+            <p className="hint">Adds {opp?.professor_name} to your network with a follow-up draft.</p>
           </form>
 
-          <form action={toggleSaved}>
+          <form action={toggleSaved} style={{ textAlign: 'center', marginTop: 20 }}>
             <input type="hidden" name="match_id" value={match.id} />
-            <button type="submit" className="l-btn l-btn-white" style={{ width: '100%', height: 50, border: '1.5px solid var(--links-tint-3)' }}>
-              {match.saved_at ? 'Saved · remove' : 'Save for later'}
-            </button>
+            <button type="submit" className="link">{match.saved_at ? 'Saved · remove' : 'Save for later'}</button>
           </form>
         </aside>
       </div>
-    </div>
+    </>
   )
 }
