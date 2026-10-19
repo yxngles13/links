@@ -33,7 +33,7 @@ export default function AppNav({ active = 'research' }: { active?: Tab }) {
             <NavLink href="/matches" active={active === 'research'}>Research</NavLink>
             <NavLink href="/network" active={active === 'network'}>Network</NavLink>
             <NavLink href="/mentors" active={active === 'mentors'}>Mentors</NavLink>
-            <NavLink href="/onboarding" active={active === 'profile'}>Profile</NavLink>
+            <NavLink href="/profile" active={active === 'profile'}>Profile</NavLink>
           </>
         )}
       </nav>
