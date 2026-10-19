@@ -1,14 +1,15 @@
-/* Same tokens as app/globals.css, so the popup reads as part of Links. */
+/* Same tokens as app/globals.css (Links, editorial): paper, ink, one blue
+   accent, serif for the heading, underline fields, square black buttons. */
 :root {
-  --primary: #4f7bf7;
-  --primary-hover: #3f67e0;
-  --secondary: #2b3a9e;
-  --tint-1: #dce6ff;
-  --tint-2: #eef2fd;
-  --surface: #f1f4fd;
-  --text: #131316;
-  --muted: #5b6584;
-  --border: rgba(19, 19, 22, 0.14);
+  --paper: #fafaf8;
+  --ink: #111111;
+  --text-2: #333333;
+  --muted: #6b6b66;
+  --faint: #999999;
+  --line: #e3e2dd;
+  --line-strong: #d4d3cc;
+  --accent: #2b4bd8;
+  --danger: #a01818;
 }
 
 * { box-sizing: border-box; }
@@ -16,81 +17,81 @@
 body {
   margin: 0;
   width: 360px;
-  background: #fff;
-  color: var(--text);
-  font-family: 'Manrope', system-ui, sans-serif;
-  font-size: 13.5px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
 }
 
 .head {
-  background: var(--secondary);
-  color: #fff;
-  padding: 12px 10px 12px 20px;
+  padding: 16px 12px 14px 22px;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  border-bottom: 1px solid var(--line);
 }
-.title { margin: 0; font-family: 'Archivo Black', system-ui, sans-serif; font-weight: 400; font-size: 15px; }
+.title { margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 28px; line-height: 1.1; }
 
 .icon-btn {
-  width: 36px; height: 36px; border: none; border-radius: 999px;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: transparent; color: rgba(255, 255, 255, 0.7); cursor: pointer;
+  width: 32px; height: 32px; border: none; background: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; color: var(--muted);
 }
-.icon-btn:hover, .icon-btn:focus-visible { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.icon-btn:hover, .icon-btn:focus-visible { color: var(--ink); }
 
-.body { padding: 16px 20px 18px; display: flex; flex-direction: column; gap: 12px; }
+.body { padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 16px; }
 .state[hidden] { display: none; }
 
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.field { display: flex; flex-direction: column; gap: 5px; border: none; padding: 0; margin: 0; min-width: 0; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.field { display: flex; flex-direction: column; gap: 4px; border: none; padding: 0; margin: 0; min-width: 0; }
 
-label, legend {
-  font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
-  color: rgba(19, 19, 22, 0.55); padding: 0;
-}
-legend { margin-bottom: 6px; }
+/* Field labels only: the "How you met" choices are <label>s too. */
+.field > label, legend { font-size: 12px; color: var(--muted); padding: 0; }
+legend { margin-bottom: 8px; }
 
 input, textarea {
   width: 100%;
-  padding: 9px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  padding: 2px 0 7px;
   font: inherit;
-  font-size: 13.5px;
-  color: var(--text);
-  background: #fff;
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
 }
-textarea { resize: vertical; }
-input:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--tint-2); }
+input::placeholder, textarea::placeholder { color: var(--faint); }
+input:focus, textarea:focus { border-bottom-color: var(--accent); box-shadow: 0 1px 0 var(--accent); }
+textarea { resize: vertical; line-height: 1.5; }
 
-.hint { font-size: 11.5px; color: rgba(19, 19, 22, 0.45); }
+.hint { font-size: 11.5px; color: var(--muted); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { position: relative; }
 .chip input { position: absolute; inset: 0; opacity: 0; cursor: pointer; margin: 0; }
 .chip span {
-  display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 999px;
-  background: rgba(19, 19, 22, 0.06); color: rgba(19, 19, 22, 0.6);
-  font-size: 12px; font-weight: 700;
+  display: inline-flex; align-items: center; height: 30px; padding: 0 12px;
+  border: 1px solid var(--line-strong); border-radius: 2px; font-size: 12.5px;
 }
-.chip input:checked + span { background: var(--tint-1); color: var(--secondary); }
-.chip input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+.chip input:hover + span { border-color: var(--ink); }
+.chip input:checked + span { background: var(--ink); border-color: var(--ink); color: #fff; }
+.chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .btn {
-  height: 42px; border: none; border-radius: 999px; padding: 0 20px;
-  font: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
+  height: 44px; border: 1px solid var(--ink); border-radius: 2px; padding: 0 20px;
+  background: var(--ink); color: #fff; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
 }
-.btn:disabled { opacity: 0.7; cursor: progress; }
-.btn-primary { background: var(--primary); color: #fff; }
-.btn-primary:hover { background: var(--primary-hover); }
-.btn-dark { background: var(--secondary); color: #fff; }
-.btn-soft { background: var(--surface); color: var(--secondary); }
+.btn:hover { background: #2a2a2a; }
+.btn:disabled { opacity: 0.6; cursor: progress; }
+.btn-primary, .btn-dark { background: var(--ink); color: #fff; }
+.btn-soft { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+.btn-soft:hover { background: #fff; border-color: var(--ink); }
 
-.lead { margin: 0; font-size: 15px; font-weight: 800; }
+.lead { margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 24px; line-height: 1.2; }
 .muted { margin: 0; color: var(--muted); line-height: 1.5; }
 .small { font-size: 12px; }
-.prefill { margin: 0; padding: 8px 12px; border-radius: 10px; background: var(--tint-2); color: var(--primary-hover); font-weight: 700; }
-.error { margin: 0; color: #a01818; font-weight: 700; }
+.prefill { margin: 0; font-size: 12px; color: var(--accent); }
+.error { margin: 0; padding-left: 10px; border-left: 2px solid var(--danger); color: var(--danger); }
 .signed-in { text-align: center; }
-a { color: var(--secondary); font-weight: 800; }
+a { color: var(--ink); border-bottom: 1px solid var(--ink); }

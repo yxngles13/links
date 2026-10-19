@@ -9,9 +9,9 @@ export function isMissingTable(error: { code?: string; message?: string } | null
 
 export default function MigrationNotice() {
   return (
-    <div className="l-card l-card-soft">
-      <div className="l-eyebrow" style={{ marginBottom: 8 }}>Setup needed</div>
-      <p className="l-body" style={{ margin: 0 }}>
+    <div className="notice">
+      <div className="label" style={{ marginBottom: 8 }}>Setup needed</div>
+      <p className="body-copy">
         Mentor matching needs its database tables. Run <code>supabase/migrations/20261018000000_mentors.sql</code> in the
         Supabase SQL Editor, then reload this page.
       </p>

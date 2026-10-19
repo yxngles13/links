@@ -1,21 +1,10 @@
 // components/AppNav.tsx
-// Shared top pill nav. Students get Research / Network / Mentors; mentor
-// accounts get their own two-item nav (dashboard + profile).
+// Top bar: serif wordmark left, plain text links right, active link
+// underlined. Students get Research / Network / Mentors; mentor accounts
+// get their own two-item nav.
 import Link from 'next/link'
 
-type Tab = 'research' | 'network' | 'mentors' | 'mentor-dashboard' | 'mentor-profile'
-
-export function Logo() {
-  return (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-      <svg width="22" height="22" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-        <rect x="2" y="9" width="14" height="8" rx="4" transform="rotate(-30 9 13)" stroke="#6C93FF" strokeWidth="2.6" />
-        <rect x="10" y="9" width="14" height="8" rx="4" transform="rotate(-30 17 13)" stroke="#ffffff" strokeWidth="2.6" />
-      </svg>
-      <span className="l-display" style={{ fontSize: 19 }}>Links</span>
-    </span>
-  )
-}
+type Tab = 'research' | 'network' | 'mentors' | 'profile' | 'mentor-dashboard' | 'mentor-profile'
 
 function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
@@ -29,15 +18,14 @@ export default function AppNav({ active = 'research' }: { active?: Tab }) {
   const isMentor = active === 'mentor-dashboard' || active === 'mentor-profile'
 
   return (
-    <nav className="l-nav">
-      <Link href={isMentor ? '/mentor' : '/matches'}>
-        <Logo />
+    <header className="topbar">
+      <Link href={isMentor ? '/mentor' : '/matches'} className="brand">
+        Links{isMentor ? <small>Mentor</small> : null}
       </Link>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+      <nav className="topnav" aria-label="Main">
         {isMentor ? (
           <>
-            <NavLink href="/mentor" active={active === 'mentor-dashboard'}>Mentor dashboard</NavLink>
+            <NavLink href="/mentor" active={active === 'mentor-dashboard'}>Dashboard</NavLink>
             <NavLink href="/mentor/profile" active={active === 'mentor-profile'}>My profile</NavLink>
           </>
         ) : (
@@ -45,11 +33,20 @@ export default function AppNav({ active = 'research' }: { active?: Tab }) {
             <NavLink href="/matches" active={active === 'research'}>Research</NavLink>
             <NavLink href="/network" active={active === 'network'}>Network</NavLink>
             <NavLink href="/mentors" active={active === 'mentors'}>Mentors</NavLink>
+            <NavLink href="/onboarding" active={active === 'profile'}>Profile</NavLink>
           </>
         )}
-      </div>
+      </nav>
+    </header>
+  )
+}
 
-      {isMentor ? <span /> : <Link href="/onboarding">Edit profile</Link>}
-    </nav>
+// Bare top bar for pages outside the signed-in app (onboarding, sign-up).
+export function BrandBar({ right }: { right?: React.ReactNode }) {
+  return (
+    <header className="topbar">
+      <Link href="/" className="brand">Links</Link>
+      {right ? <span className="meta">{right}</span> : null}
+    </header>
   )
 }
