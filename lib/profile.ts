@@ -69,9 +69,24 @@ export function staleMatchIds(
 
 const MB = 1024 * 1024
 const UPLOADS = {
-  photo: { maxBytes: 2 * MB, types: { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }, label: 'Photo should be a JPEG, PNG or WebP under 2 MB.' },
-  resume: { maxBytes: 3 * MB, types: { 'application/pdf': 'pdf' }, label: 'Resume should be a PDF under 3 MB.' },
+  photo: { maxBytes: 1.5 * MB, types: { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }, label: 'Photo should be a JPEG, PNG or WebP under 1.5 MB.' },
+  resume: { maxBytes: 2.5 * MB, types: { 'application/pdf': 'pdf' }, label: 'Resume should be a PDF under 2.5 MB.' },
 } as const
+
+// Photo and resume can arrive in the same save, so together (4 MB) they
+// stay under serverActions.bodySizeLimit in next.config.ts.
+
+// The browser-reported type is just a claim; check the file's first bytes.
+const MAGIC: Record<string, number[][]> = {
+  'application/pdf': [[0x25, 0x50, 0x44, 0x46]], // %PDF
+  'image/png': [[0x89, 0x50, 0x4e, 0x47]],
+  'image/jpeg': [[0xff, 0xd8, 0xff]],
+  'image/webp': [[0x52, 0x49, 0x46, 0x46]], // RIFF
+}
+
+export function matchesFileType(head: Uint8Array, type: string): boolean {
+  return (MAGIC[type] ?? []).some((sig) => sig.every((b, i) => head[i] === b))
+}
 
 // null = nothing chosen (browsers send an empty file for an untouched input).
 export function validateUpload(

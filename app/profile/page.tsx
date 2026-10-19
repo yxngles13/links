@@ -109,12 +109,12 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
               <div className="field">
                 <label htmlFor="photo">Photo {profile?.photo_path ? '(choose a file to replace it)' : ''}</label>
                 <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" className="input" />
-                <p className="hint">JPEG, PNG or WebP, up to 2 MB.</p>
+                <p className="hint">JPEG, PNG or WebP, up to 1.5 MB.</p>
               </div>
               <div className="field">
                 <label htmlFor="resume">Resume {profile?.resume_path ? '(choose a file to replace it)' : ''}</label>
                 <input id="resume" name="resume" type="file" accept="application/pdf" className="input" />
-                <p className="hint">PDF, up to 3 MB. Anyone signed in to Links can see this, so leave off your phone number and home address.</p>
+                <p className="hint">PDF, up to 2.5 MB. Anyone signed in to Links can see this, so leave off your phone number and home address.</p>
               </div>
             </div>
 

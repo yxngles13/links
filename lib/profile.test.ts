@@ -1,7 +1,7 @@
 // lib/profile.test.ts — run with `npm test`.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { githubUrl, linkedinUrl, parsePromptAnswers, staleMatchIds, validateUpload } from './profile.ts'
+import { githubUrl, matchesFileType, linkedinUrl, parsePromptAnswers, staleMatchIds, validateUpload } from './profile.ts'
 
 test('keeps at most 3 answers', () => {
   const out = parsePromptAnswers(['problem', 'rabbit_hole', 'ask_me', 'learning'], ['a', 'b', 'c', 'd'])
@@ -47,4 +47,11 @@ test('uploads are size and type checked', () => {
   assert.deepEqual(validateUpload(file(1000, 'application/pdf'), 'resume'), { ok: true, ext: 'pdf', type: 'application/pdf' })
   assert.deepEqual(validateUpload(file(1000, 'image/png'), 'photo'), { ok: true, ext: 'png', type: 'image/png' })
   assert.equal(validateUpload(file(3 * 1024 * 1024, 'image/png'), 'photo')?.ok, false)
+})
+
+test('file contents must match the claimed type', () => {
+  assert.equal(matchesFileType(new Uint8Array([0x25, 0x50, 0x44, 0x46]), 'application/pdf'), true)
+  assert.equal(matchesFileType(new TextEncoder().encode('<svg'), 'application/pdf'), false)
+  assert.equal(matchesFileType(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), 'image/jpeg'), true)
+  assert.equal(matchesFileType(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), 'image/png'), false)
 })

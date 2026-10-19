@@ -9,7 +9,7 @@ import { after } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { toArray } from '@/lib/format'
 import { generateMatchesForStudent } from '@/lib/matching'
-import { githubUrl, linkedinUrl, MAX_HEADLINE_LENGTH, parsePromptAnswers, validateUpload } from '@/lib/profile'
+import { githubUrl, linkedinUrl, matchesFileType, MAX_HEADLINE_LENGTH, parsePromptAnswers, validateUpload } from '@/lib/profile'
 import { getPublicProfile, PROFILE_BUCKET } from '@/lib/student-profile'
 
 const fail = (message: string): never => redirect(`/profile?error=${encodeURIComponent(message)}`)
@@ -35,15 +35,20 @@ export async function saveAbout(formData: FormData) {
   if (missing) fail('Profiles need a database update first. See the note at the top of this page.')
 
   // Fixed names under the user's folder, so a new upload replaces the old
-  // one. Only the photo's extension can change; then the old file goes.
+  // one. Only the photo's extension can change; the old file is removed
+  // after the row points at the new one, so a failed save never leaves a
+  // broken photo.
+  const replaced: string[] = []
   const upload = async (field: 'photo' | 'resume', check: typeof photo, oldPath: string | null | undefined) => {
     if (!check?.ok) return oldPath ?? null
+    const file = formData.get(field) as File
+    if (!matchesFileType(new Uint8Array(await file.slice(0, 4).arrayBuffer()), check.type)) {
+      fail(`That ${field} file doesn't look like a ${check.ext.toUpperCase()}.`)
+    }
     const path = `${user.id}/${field}.${check.ext}`
-    const { error } = await supabase.storage
-      .from(PROFILE_BUCKET)
-      .upload(path, formData.get(field) as File, { upsert: true, contentType: check.type })
+    const { error } = await supabase.storage.from(PROFILE_BUCKET).upload(path, file, { upsert: true, contentType: check.type })
     if (error) fail(`Could not upload your ${field}: ${error.message}`)
-    if (oldPath && oldPath !== path) await supabase.storage.from(PROFILE_BUCKET).remove([oldPath])
+    if (oldPath && oldPath !== path) replaced.push(oldPath)
     return path
   }
 
@@ -62,6 +67,7 @@ export async function saveAbout(formData: FormData) {
     { onConflict: 'user_id' }
   )
   if (error) fail(`Could not save your profile: ${error.message}`)
+  if (replaced.length) await supabase.storage.from(PROFILE_BUCKET).remove(replaced)
 
   // Headline and prompts reach matching on the next regeneration; re-running
   // it here would spend a minute of Groq quota on a profile tweak.
@@ -111,9 +117,11 @@ export async function saveMatchingAnswers(formData: FormData) {
 // Both pop-up buttons land here; "Answer questions" also jumps to the form.
 export async function dismissReminder(formData: FormData) {
   const { supabase, user } = await requireUser()
-  await supabase
+  const { error } = await supabase
     .from('student_public_profiles')
     .upsert({ user_id: user.id, reminder_seen_at: new Date().toISOString() }, { onConflict: 'user_id' })
+  // Without this the pop-up would silently come back on every page.
+  if (error) fail(`Could not save that: ${error.message}`)
   revalidatePath('/', 'layout')
   if (formData.get('go') === 'answer') redirect('/profile#matching')
 }

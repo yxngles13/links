@@ -9,11 +9,12 @@ import { getPublicProfile } from '@/lib/student-profile'
 
 export default async function ProfileReminder() {
   const { supabase, user } = await requireUser()
-  const [{ data: answers }, { profile, missing }] = await Promise.all([
+  // A reminder is never worth breaking the page it sits on.
+  const [{ data: answers, error }, { profile, missing }] = await Promise.all([
     supabase.from('student_profiles').select('id').eq('user_id', user.id).maybeSingle(),
-    getPublicProfile(supabase, user.id),
+    getPublicProfile(supabase, user.id).catch(() => ({ profile: null, missing: true })),
   ])
-  if (answers) return null
+  if (answers || error) return null
 
   // Without the profiles table there's nowhere to remember "seen", so skip
   // the pop-up rather than show it on every page load.

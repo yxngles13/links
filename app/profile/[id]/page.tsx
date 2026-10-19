@@ -22,7 +22,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   ])
   // No row: the student hasn't filled anything in yet (or the id is unknown;
   // RLS doesn't let us tell those apart, and it doesn't matter here).
-  if (!profile) {
+  if (!profile || (!profile.full_name && !profile.headline && !profile.prompts.length)) {
     return (
       <>
         <AppNav active={mentor ? 'mentor-dashboard' : 'profile'} />

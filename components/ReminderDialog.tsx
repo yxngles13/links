@@ -2,9 +2,11 @@
 // components/ReminderDialog.tsx
 // The one-time "finish setting up" pop-up. Either button records that it was
 // seen, so from then on ProfileReminder shows the banner instead.
+import { useRef } from 'react'
 import { dismissReminder } from '@/app/profile/actions'
 
 export default function ReminderDialog() {
+  const later = useRef<HTMLButtonElement>(null)
   return (
     <dialog
       ref={(el) => {
@@ -12,6 +14,11 @@ export default function ReminderDialog() {
       }}
       className="dialog"
       aria-labelledby="reminder-title"
+      // Escape counts as "Later", otherwise the pop-up would come back.
+      onCancel={(e) => {
+        e.preventDefault()
+        later.current?.click()
+      }}
     >
       <form action={dismissReminder}>
         <div className="eyebrow" style={{ marginBottom: 14 }}>Welcome to Links</div>
@@ -23,7 +30,7 @@ export default function ReminderDialog() {
         </p>
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
           <button type="submit" name="go" value="answer" className="btn">Answer questions</button>
-          <button type="submit" name="go" value="later" className="link-quiet">Later</button>
+          <button ref={later} type="submit" name="go" value="later" className="link-quiet">Later</button>
         </div>
       </form>
     </dialog>
