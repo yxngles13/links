@@ -15,6 +15,7 @@ import { displayName } from '@/lib/auth'
 import { MET_OPTIONS } from '@/lib/format'
 import { createContact, recordInteraction } from '@/lib/network'
 import { refreshContactContent } from '@/lib/generate-network-content'
+import { spendCredit } from '@/lib/credits'
 
 // The extension's requests carry Origin: chrome-extension://<id>. Anything
 // else from another site is refused, so a random page can't save contacts
@@ -92,7 +93,8 @@ export async function POST(request: Request) {
     // The summary, questions and follow-up draft take a few seconds of LLM
     // time. Write them after responding so the popup closes right away; the
     // contact page shows them once they land.
-    after(() => refreshContactContent(id, supabase, displayName(user)))
+    // Costs an AI credit; with none left the contact still saves.
+    if (await spendCredit(supabase)) after(() => refreshContactContent(id, supabase, displayName(user)))
 
     return NextResponse.json({ id, url: new URL(`/network/${id}`, request.url).toString() }, { status: 201 })
   } catch (err) {

@@ -4,7 +4,10 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireUser, displayName } from '@/lib/auth'
+import { OUT_OF_CREDITS, spendCredit } from '@/lib/credits'
 import { findOrCreateContact, recordInteraction } from '@/lib/network'
+import { rewriteDraft } from '@/lib/rewrite-draft'
+import { MAX_DRAFT_LENGTH } from '@/lib/rewrite-prompt'
 
 async function loadMatch(matchId: string) {
   const { supabase, user } = await requireUser()
@@ -76,5 +79,39 @@ export async function toggleSaved(formData: FormData) {
   if (error) redirect(`/matches/${matchId}?error=${encodeURIComponent(error.message)}`)
 
   revalidatePath('/matches')
+  revalidatePath(`/matches/${matchId}`)
+}
+
+function matchFail(matchId: string, message: string): never {
+  redirect(`/matches/${matchId}?error=${encodeURIComponent(message)}`)
+}
+
+// Hand edits to the outreach draft. Free: no AI involved.
+export async function saveOutreachDraft(formData: FormData) {
+  const matchId = String(formData.get('match_id') ?? '')
+  const { supabase } = await loadMatch(matchId)
+  const draft = String(formData.get('draft') ?? '').slice(0, MAX_DRAFT_LENGTH)
+  const { error } = await supabase.from('match_recommendations').update({ outreach_draft: draft }).eq('id', matchId)
+  if (error) matchFail(matchId, error.message)
+  revalidatePath(`/matches/${matchId}`)
+}
+
+// Rewrites the draft (as currently typed) from the student's instruction.
+// Costs an AI credit.
+export async function rewriteOutreachDraft(formData: FormData) {
+  const matchId = String(formData.get('match_id') ?? '')
+  const { supabase, match } = await loadMatch(matchId)
+  const opp = match.opportunities as unknown as { professor_name: string; department: string | null; lab_name: string | null }
+
+  if (!(await spendCredit(supabase))) matchFail(matchId, OUT_OF_CREDITS)
+  const rewritten = await rewriteDraft({
+    draft: String(formData.get('draft') ?? ''),
+    instruction: String(formData.get('instruction') ?? ''),
+    context: `A first email from the student to ${opp.professor_name}${opp.lab_name ? ` (${opp.lab_name})` : ''}${opp.department ? `, ${opp.department}` : ''}, asking about research opportunities.`,
+  })
+  if (!rewritten) matchFail(matchId, "Couldn't rewrite it right now. Your draft wasn't changed.")
+
+  const { error } = await supabase.from('match_recommendations').update({ outreach_draft: rewritten }).eq('id', matchId)
+  if (error) matchFail(matchId, error.message)
   revalidatePath(`/matches/${matchId}`)
 }
