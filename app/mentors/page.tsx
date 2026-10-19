@@ -2,6 +2,7 @@
 // Mentee dashboard: next chat, request statuses, goals, suggested mentors.
 import Link from 'next/link'
 import AppNav from '@/components/AppNav'
+import ProfileReminder from '@/components/ProfileReminder'
 import MigrationNotice, { isMissingTable } from '@/components/MigrationNotice'
 import LinkedInLink from '@/components/LinkedInLink'
 import SubmitButton from '@/components/SubmitButton'
@@ -103,6 +104,7 @@ export default async function MenteeDashboardPage({ searchParams }: { searchPara
     return (
       <>
         <AppNav active="mentors" />
+        <ProfileReminder />
         <main className="page"><MigrationNotice /></main>
       </>
     )
@@ -119,6 +121,7 @@ export default async function MenteeDashboardPage({ searchParams }: { searchPara
   return (
     <>
       <AppNav active="mentors" />
+      <ProfileReminder />
       <div className="shell">
         <main className="main">
           <div className="head-row">

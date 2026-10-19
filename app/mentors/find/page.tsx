@@ -3,6 +3,7 @@
 // student's profile, each with an inline "Request a chat" form.
 import Link from 'next/link'
 import AppNav from '@/components/AppNav'
+import ProfileReminder from '@/components/ProfileReminder'
 import MigrationNotice, { isMissingTable } from '@/components/MigrationNotice'
 import LinkedInLink from '@/components/LinkedInLink'
 import SubmitButton from '@/components/SubmitButton'
@@ -38,6 +39,7 @@ export default async function MentorMatchesPage({ searchParams }: { searchParams
   return (
     <>
       <AppNav active="mentors" />
+      <ProfileReminder />
       <div className="shell">
         <main className="main">
           <Link href="/mentors" className="back">← Your mentors</Link>
@@ -49,7 +51,7 @@ export default async function MentorMatchesPage({ searchParams }: { searchParams
           {!missing && !student ? (
             <div className="notice" style={{ marginBottom: 24 }}>
               <p className="body-copy" style={{ marginBottom: 14 }}>Fill in your profile so we can rank mentors for you.</p>
-              <Link href="/onboarding" className="btn">Set up your profile</Link>
+              <Link href="/profile#matching" className="btn">Set up your profile</Link>
             </div>
           ) : null}
           {!missing && ranked.length === 0 ? <p className="body-copy">No mentors are taking requests yet.</p> : null}
