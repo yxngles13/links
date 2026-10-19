@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Links — Add to network",
+  "short_name": "Links",
+  "version": "0.1.0",
+  "description": "Save the person you just met to your Links network, from any page. Prefills from LinkedIn profiles.",
+  "action": {
+    "default_title": "Add to Links network",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["http://localhost:3000/*"],
+  "optional_host_permissions": ["https://*/*", "http://*/*"],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  }
+}
