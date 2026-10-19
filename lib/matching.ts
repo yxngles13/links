@@ -130,12 +130,17 @@ export async function generateMatchesForStudent(studentProfileId: string, supaba
   // Matching now re-runs whenever the questions change, so professors that
   // dropped out of the new results are removed instead of piling up with
   // stale scores. Saved and contacted ones stay.
-  const [{ data: existing }, { data: contacted }] = await Promise.all([
+  const [{ data: existing, error: existingError }, { data: contacted, error: contactedError }] = await Promise.all([
     supabase.from('match_recommendations').select('id, opportunity_id, saved_at').eq('student_profile_id', studentProfileId),
     supabase.from('interactions').select('opportunity_id').eq('student_profile_id', studentProfileId),
   ])
+  // If either lookup fails, skip pruning: guessing could delete a contacted match.
+  if (existingError || contactedError) {
+    console.error('Skipped stale-match cleanup:', (existingError ?? contactedError)?.message)
+    return rows
+  }
   const keep = new Set([...rows.map((r) => r.opportunity_id), ...(contacted ?? []).map((i) => i.opportunity_id)])
-  const stale = staleMatchIds(existing ?? [], keep)
+  const stale = staleMatchIds(existing, keep)
   if (stale.length) {
     const { error: deleteError } = await supabase.from('match_recommendations').delete().in('id', stale)
     if (deleteError) console.error('Could not remove stale matches:', deleteError.message)

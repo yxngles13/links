@@ -31,7 +31,14 @@ export async function getPublicProfile(
     if (isMissingTable(error)) return { profile: null, missing: true }
     throw new Error(`Could not load profile: ${error.message}`)
   }
-  return { profile: data ? { ...data, prompts: Array.isArray(data.prompts) ? data.prompts : [] } : null, missing: false }
+  return { profile: data ? { ...data, prompts: cleanPrompts(data.prompts) } : null, missing: false }
+}
+
+// Rows can be written straight through the API, not only by our form, so
+// never trust the shape of the stored JSON when rendering it.
+function cleanPrompts(value: unknown): PromptAnswer[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((p): p is PromptAnswer => typeof p?.key === 'string' && typeof p?.answer === 'string')
 }
 
 // The bucket is private; pages render links that work for an hour.

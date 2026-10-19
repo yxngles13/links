@@ -14,9 +14,10 @@ const nextConfig: NextConfig = {
     "/**": [`${ONNX_BIN}/darwin/**/*`, `${ONNX_BIN}/win32/**/*`, `${ONNX_BIN}/linux/arm64/**/*`],
   },
   experimental: {
-    // Profile photo (≤2 MB) and resume (≤3 MB) upload through a server
-    // action; the default limit is 1 MB. Vercel caps bodies at 4.5 MB.
-    serverActions: { bodySizeLimit: "4mb" },
+    // Profile photo (≤1.5 MB) and resume (≤2.5 MB) can upload together
+    // through one server action; the default limit is 1 MB. Vercel caps
+    // request bodies at 4.5 MB.
+    serverActions: { bodySizeLimit: "4.4mb" },
   },
 };
 

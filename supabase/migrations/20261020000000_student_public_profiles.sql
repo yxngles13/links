@@ -36,6 +36,18 @@ create table if not exists public.student_public_profiles (
   updated_at timestamptz not null default now()
 );
 
+-- The app validates all of this too, but rows can also be written straight
+-- through the API with a user's own session, so the database enforces it.
+alter table public.student_public_profiles drop constraint if exists student_public_profiles_shape;
+alter table public.student_public_profiles add constraint student_public_profiles_shape check (
+  jsonb_typeof(prompts) = 'array'
+  and jsonb_array_length(prompts) <= 3
+  and char_length(coalesce(headline, '')) <= 120
+  and char_length(coalesce(full_name, '')) <= 200
+  and (photo_path is null or photo_path like user_id::text || '/%')
+  and (resume_path is null or resume_path like user_id::text || '/%')
+);
+
 alter table public.student_public_profiles enable row level security;
 
 drop policy if exists "student_public_profiles readable by signed-in users" on public.student_public_profiles;
@@ -53,9 +65,11 @@ create policy "student_public_profiles update own"
 -- ---------- Storage: photo and resume ----------
 -- Private bucket; pages hand out short-lived signed URLs to signed-in users.
 -- Objects live under <user_id>/, and only the owner can write there.
-insert into storage.buckets (id, name, public)
-values ('profile-files', 'profile-files', false)
-on conflict (id) do nothing;
+-- 2.5 MB cap and allowed types match lib/profile.ts (photo 1.5 MB, resume 2.5 MB).
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('profile-files', 'profile-files', false, 2621440, array['application/pdf', 'image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do update
+  set file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "profile-files readable by signed-in users" on storage.objects;
 create policy "profile-files readable by signed-in users"
