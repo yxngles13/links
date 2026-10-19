@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import AppNav from '@/components/AppNav'
 import MigrationNotice, { isMissingTable } from '@/components/MigrationNotice'
+import LinkedInLink from '@/components/LinkedInLink'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser, displayName } from '@/lib/auth'
 import { formatChatTime, timeAgo } from '@/lib/format'
@@ -16,7 +17,7 @@ type Request = {
   scheduled_at: string | null
   created_at: string
   mentor_profile_id: string
-  mentor_profiles: { full_name: string; grad_year: number | null; job_title: string | null; company: string | null; preferred_format: string | null } | null
+  mentor_profiles: { full_name: string; grad_year: number | null; job_title: string | null; company: string | null; preferred_format: string | null; linkedin_url?: string | null } | null
 }
 
 // Splits requests by time. Kept out of the component so "now" is read once
@@ -90,7 +91,7 @@ export default async function MenteeDashboardPage({ searchParams }: { searchPara
   const [{ data, error: reqError }, { data: goals }] = await Promise.all([
     supabase
       .from('mentorship_requests')
-      .select('id, topic, status, scheduled_at, created_at, mentor_profile_id, mentor_profiles ( full_name, grad_year, job_title, company, preferred_format )')
+      .select('id, topic, status, scheduled_at, created_at, mentor_profile_id, mentor_profiles ( * )')
       .eq('student_user_id', user.id)
       .order('created_at', { ascending: false }),
     // Tie-break on id: goals created together share a timestamp, and without
@@ -146,7 +147,10 @@ export default async function MenteeDashboardPage({ searchParams }: { searchPara
               <div className="row-split" style={{ alignItems: 'flex-end', flexWrap: 'wrap' }}>
                 <div>
                   <div className="serif" style={{ fontSize: 32 }}>{next.mentor_profiles?.full_name}</div>
-                  <div className="meta" style={{ fontSize: 13.5 }}>{[next.topic, next.mentor_profiles?.preferred_format].filter(Boolean).join(' · ')}</div>
+                  <div className="meta" style={{ fontSize: 13.5, display: 'flex', flexWrap: 'wrap', gap: '4px 14px' }}>
+                    <span>{[next.topic, next.mentor_profiles?.preferred_format].filter(Boolean).join(' · ')}</span>
+                    <LinkedInLink url={next.mentor_profiles?.linkedin_url} name={next.mentor_profiles?.full_name ?? 'Mentor'} style={{ fontSize: 13 }} />
+                  </div>
                 </div>
                 <ScheduleForm request={next} label="Reschedule" />
               </div>
@@ -164,7 +168,8 @@ export default async function MenteeDashboardPage({ searchParams }: { searchPara
                     <div className="row-split" style={{ flexWrap: 'wrap', fontSize: 15 }}>
                       <span>
                         {r.mentor_profiles?.full_name}{' '}
-                        <span className="muted">· {r.topic ?? (r.mentor_profiles ? mentorSubtitle(r.mentor_profiles) : '')}</span>
+                        <span className="muted">· {r.topic ?? (r.mentor_profiles ? mentorSubtitle(r.mentor_profiles) : '')}</span>{' '}
+                        <LinkedInLink url={r.mentor_profiles?.linkedin_url} name={r.mentor_profiles?.full_name ?? 'Mentor'} style={{ fontSize: 13, marginLeft: 8 }} />
                       </span>
                       <span style={{ color: r.status === 'scheduled' && !r.isPast ? 'var(--accent)' : 'var(--text-3)' }}>{statusText(r)}</span>
                     </div>
@@ -204,7 +209,10 @@ export default async function MenteeDashboardPage({ searchParams }: { searchPara
               <ul className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 {suggested.map(({ mentor: m }) => (
                   <li key={m.id} className="row row-tight row-split" style={{ fontSize: 14 }}>
-                    <span>{m.full_name} <span className="muted">· {m.grad_year ? `CPP '${String(m.grad_year).slice(-2)}` : m.company}</span></span>
+                    <span>
+                      {m.full_name} <span className="muted">· {m.grad_year ? `CPP '${String(m.grad_year).slice(-2)}` : m.company}</span>{' '}
+                      <LinkedInLink url={m.linkedin_url} name={m.full_name} style={{ fontSize: 12, marginLeft: 6 }} />
+                    </span>
                     <Link href={`/mentors/find#m-${m.id}`} className="link" style={{ fontSize: 13 }}>Request</Link>
                   </li>
                 ))}

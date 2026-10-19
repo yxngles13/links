@@ -4,6 +4,7 @@
 import Link from 'next/link'
 import AppNav from '@/components/AppNav'
 import MigrationNotice, { isMissingTable } from '@/components/MigrationNotice'
+import LinkedInLink from '@/components/LinkedInLink'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser } from '@/lib/auth'
 import { mentorSubtitle, rankMentorsForStudent } from '@/lib/mentors'
@@ -60,7 +61,10 @@ export default async function MentorMatchesPage({ searchParams }: { searchParams
                   <span className="num" style={{ width: 24, paddingTop: 8 }}>{String(i + 1).padStart(2, '0')}</span>
                   <div style={{ flex: 1, minWidth: 'min(100%, 320px)' }}>
                     <h2 className="name" style={{ margin: 0 }}>{m.full_name}</h2>
-                    <div style={{ fontSize: 13.5, color: 'var(--muted)', margin: '2px 0 10px' }}>{mentorSubtitle(m)}</div>
+                    <div style={{ fontSize: 13.5, color: 'var(--muted)', margin: '2px 0 10px', display: 'flex', flexWrap: 'wrap', gap: '4px 14px' }}>
+                      <span>{mentorSubtitle(m)}</span>
+                      <LinkedInLink url={m.linkedin_url} name={m.full_name} style={{ fontSize: 13 }} />
+                    </div>
                     {m.bio ? <p className="body-copy" style={{ color: 'var(--text-2)', maxWidth: 560 }}>{m.bio}</p> : null}
                     {m.mentor_topics.length ? <div className="num" style={{ marginTop: 10 }}>{m.mentor_topics.join(' · ')}</div> : null}
 
