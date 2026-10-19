@@ -134,6 +134,7 @@ a {
   background: rgba(255, 255, 255, 0.12);
 }
 .l-nav-light a { opacity: 1; font-size: 15px; font-weight: 600; }
+.l-nav a.l-nav-logo { opacity: 1; }
 
 /* ---------- Cards ---------- */
 .l-card {

@@ -76,3 +76,15 @@ export async function logInteraction(formData: FormData) {
   revalidatePath(`/network/${contactId}`)
   redirect(`/network/${contactId}`)
 }
+
+export async function deleteContact(formData: FormData) {
+  const { supabase } = await requireUser()
+  const contactId = String(formData.get('contact_id') ?? '')
+  // RLS limits deletes to the user's own contacts; the timeline, summary
+  // and follow-up drafts cascade with it.
+  const { error } = await supabase.from('network_contacts').delete().eq('id', contactId)
+  if (error) fail(`/network/${contactId}`, error.message)
+
+  revalidatePath('/network')
+  redirect('/network')
+}
