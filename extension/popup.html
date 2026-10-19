@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add to Links network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="head">
+    <h1 class="title">+ Add to network</h1>
+    <button type="button" id="close" class="icon-btn" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </header>
+
+  <!-- One of these sections is shown at a time; popup.js switches them. -->
+  <section id="loading" class="body state">
+    <p class="muted">Connecting to Links…</p>
+  </section>
+
+  <section id="signed-out" class="body state" hidden>
+    <p class="lead">Sign in to Links to save contacts.</p>
+    <p class="muted">The extension uses your Links login in this browser. Sign in, then open this popup again.</p>
+    <button type="button" id="open-login" class="btn btn-primary">Sign in to Links</button>
+    <p class="muted small" id="offline-note" hidden>Couldn’t reach <span id="app-url"></span>. Is the app running? <a href="#" id="open-options">Change URL</a></p>
+  </section>
+
+  <form id="form" class="body state" hidden>
+    <p class="prefill small" id="prefill-note" hidden>Filled in from this LinkedIn profile. Check it before saving.</p>
+
+    <div class="field">
+      <label for="full_name">Name</label>
+      <input id="full_name" name="full_name" required placeholder="Priya Nair" autocomplete="off">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="role">Role</label>
+        <input id="role" name="role" placeholder="Product Manager" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="company">Company</label>
+        <input id="company" name="company" placeholder="Notion" autocomplete="off">
+      </div>
+    </div>
+
+    <fieldset class="field">
+      <legend>How you met</legend>
+      <div class="chips" id="met-options"></div>
+    </fieldset>
+
+    <div class="field">
+      <label for="tags">Tags</label>
+      <input id="tags" name="tags" placeholder="Product, Alumni" autocomplete="off">
+      <span class="hint">Separate tags with commas.</span>
+    </div>
+
+    <div class="field">
+      <label for="notes">Notes</label>
+      <textarea id="notes" name="notes" rows="3" placeholder="What did you talk about? Anything to remember?"></textarea>
+    </div>
+
+    <input type="hidden" id="linkedin_url" name="linkedin_url">
+    <p id="error" class="error" role="alert" hidden></p>
+    <button type="submit" id="save" class="btn btn-primary">Save contact</button>
+    <p class="muted small signed-in">Saving as <span id="user-name"></span></p>
+  </form>
+
+  <section id="saved" class="body state" hidden>
+    <p class="lead"><span id="saved-name"></span> is in your network.</p>
+    <p class="muted">Links is drafting a summary and a follow-up message now.</p>
+    <button type="button" id="view-contact" class="btn btn-dark">View contact →</button>
+    <button type="button" id="add-another" class="btn btn-soft">Add another</button>
+  </section>
+
+  <script src="shared.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
