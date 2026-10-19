@@ -34,7 +34,7 @@ export const createClient = async (request: NextRequest) => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const protectedPaths = ["/onboarding", "/profile", "/matches", "/network", "/mentors", "/mentor"];
+  const protectedPaths = ["/dashboard", "/onboarding", "/profile", "/matches", "/network", "/mentors", "/mentor"];
   const isProtected = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path));
 
   if (!user && isProtected) {
