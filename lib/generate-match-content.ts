@@ -12,6 +12,7 @@
 // https://console.groq.com (API Keys > Create API Key).
 
 import Groq from 'groq-sdk'
+import { promptText, type PromptAnswer } from '@/lib/profile'
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
@@ -21,6 +22,9 @@ type StudentProfileForPrompt = {
   research_interests: string[] | null
   technical_skills: string[] | null
   career_goals: string | null
+  // From the public profile; both optional so a student without one still matches.
+  headline?: string | null
+  prompts?: PromptAnswer[]
 }
 
 type OpportunityForPrompt = {
@@ -37,6 +41,9 @@ type GeneratedMatchContent = {
 }
 
 function buildPrompt(student: StudentProfileForPrompt, opp: OpportunityForPrompt): string {
+  const personality = (student.prompts ?? [])
+    .map((p) => `- ${promptText(p.key) ?? p.key} ${p.answer}`)
+    .join('\n')
   return `You are helping a college student prepare to reach out to a professor about research opportunities.
 
 STUDENT PROFILE:
@@ -44,8 +51,8 @@ STUDENT PROFILE:
 - Year: ${student.academic_year ?? 'not specified'}
 - Research interests: ${student.research_interests?.join(', ') || 'not specified'}
 - Technical skills: ${student.technical_skills?.join(', ') || 'not specified'}
-- Career goals: ${student.career_goals ?? 'not specified'}
-
+- Career goals: ${student.career_goals ?? 'not specified'}${student.headline ? `\n- Headline: ${student.headline}` : ''}
+${personality ? `\nPERSONALITY (the student's own short answers; use at most one light touch of this in the outreach email as an icebreaker, never in the explanation):\n${personality}\n` : ''}
 PROFESSOR / OPPORTUNITY:
 - Name: ${opp.professor_name}
 - Department: ${opp.department ?? 'not specified'}
