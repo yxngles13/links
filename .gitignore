@@ -43,3 +43,6 @@ next-env.d.ts
 #claude
 AGENTS.md
 CLAUDE.md
+
+# packaged Chrome extension (scripts/package-extension.mjs)
+/dist

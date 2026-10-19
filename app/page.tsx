@@ -135,13 +135,22 @@ export default function LandingPage() {
         <div className="l-center" style={{ maxWidth: 1168, margin: '0 auto', background: 'var(--links-primary)', color: '#fff', borderRadius: 32, padding: 'clamp(36px, 6vw, 64px) 24px' }}>
           <h2 className="l-section-title" style={{ margin: '0 0 10px' }}>Ready to build your network?</h2>
           <p style={{ margin: '0 0 22px', fontSize: 15, opacity: 0.88 }}>Free for Cal Poly Pomona students and alumni.</p>
-          <Link href="/login?mode=signup" className="l-btn l-btn-white" style={{ color: 'var(--links-secondary)', borderRadius: 14 }}>Get started</Link>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/login?mode=signup" className="l-btn l-btn-white" style={{ color: 'var(--links-secondary)', borderRadius: 14 }}>Get started</Link>
+            {/* Set NEXT_PUBLIC_CHROME_EXTENSION_URL to the Chrome Web Store
+                listing once the extension is published. */}
+            {process.env.NEXT_PUBLIC_CHROME_EXTENSION_URL ? (
+              <a href={process.env.NEXT_PUBLIC_CHROME_EXTENSION_URL} target="_blank" rel="noreferrer" className="l-btn l-btn-dark" style={{ borderRadius: 14 }}>
+                Add to Chrome
+              </a>
+            ) : null}
+          </div>
         </div>
       </div>
 
       <footer style={{ maxWidth: 1280, margin: '0 auto', padding: '40px clamp(16px, 4vw, 56px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, fontSize: 13, fontWeight: 600, color: 'var(--links-text-faint)' }}>
         <Logo size={20} />
-        <span>Built by a CPP student, for CPP students.</span>
+        <span>Built by a CPP student, for CPP students. · <Link href="/privacy" style={{ textDecoration: 'underline' }}>Privacy</Link></span>
       </footer>
     </main>
   )

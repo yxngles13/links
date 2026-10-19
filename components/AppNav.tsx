@@ -30,7 +30,7 @@ export default function AppNav({ active = 'research' }: { active?: Tab }) {
 
   return (
     <nav className="l-nav">
-      <Link href={isMentor ? '/mentor' : '/matches'}>
+      <Link href={isMentor ? '/mentor' : '/matches'} className="l-nav-logo" aria-label="Links home">
         <Logo />
       </Link>
 

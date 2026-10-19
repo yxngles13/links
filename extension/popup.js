@@ -83,9 +83,15 @@ async function init() {
   const appUrl = await getAppUrl()
   $('app-url').textContent = appUrl
   $('open-login').onclick = () => chrome.tabs.create({ url: `${appUrl}/login` })
-  $('open-options').onclick = (e) => {
-    e.preventDefault()
-    chrome.runtime.openOptionsPage()
+  // The store build has no options page (its URL is fixed), so only offer
+  // "Change URL" in the developer build.
+  if (chrome.runtime.getManifest().options_ui) {
+    $('open-options').onclick = (e) => {
+      e.preventDefault()
+      chrome.runtime.openOptionsPage()
+    }
+  } else {
+    $('open-options').remove()
   }
   $('close').onclick = () => window.close()
 

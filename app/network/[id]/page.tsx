@@ -6,7 +6,7 @@ import CopyButton from '@/components/CopyButton'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser } from '@/lib/auth'
 import { needsFollowUp, timeAgo } from '@/lib/format'
-import { logInteraction } from '../actions'
+import { deleteContact, logInteraction } from '../actions'
 
 const INTERACTION_TYPES = ['LinkedIn message', 'Email', 'Call', 'Coffee chat', 'Meeting', 'Note']
 
@@ -151,6 +151,15 @@ export default async function ContactPage({
               </a>
             ) : null}
           </div>
+
+          <details className="l-details" style={{ padding: '0 6px' }}>
+            <summary style={{ fontSize: 13, fontWeight: 700, color: 'var(--links-text-faint)' }}>Delete contact</summary>
+            <form action={deleteContact} style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <input type="hidden" name="contact_id" value={contact.id} />
+              <p className="l-hint">Removes {contact.full_name} and their whole timeline. This can&apos;t be undone.</p>
+              <button type="submit" className="l-btn l-btn-sm" style={{ background: '#a01818', color: '#fff' }}>Delete for good</button>
+            </form>
+          </details>
         </aside>
       </div>
     </div>
