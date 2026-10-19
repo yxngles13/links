@@ -1,0 +1,10 @@
+# Never upload local secrets with `vercel deploy`; production env vars are
+# set in the Vercel project instead.
+.env*
+/.next
+/node_modules
+# Not part of the web app. Leading slash = repo root only (a bare
+# "supabase" would also drop utils/supabase).
+/extension
+/scripts
+/supabase
