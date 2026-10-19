@@ -1,156 +1,138 @@
 // app/page.tsx  (the landing page at "/")
 import Link from 'next/link'
 
-function Logo({ size = 28 }: { size?: number }) {
-  return (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-      <span style={{ width: size + 16, height: size + 16, borderRadius: '50%', background: '#EEF2FD', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width={size - 4} height={size - 4} viewBox="0 0 26 26" fill="none" aria-hidden="true">
-          <rect x="2" y="9" width="14" height="8" rx="4" transform="rotate(-30 9 13)" stroke="#4F7BF7" strokeWidth="2.6" />
-          <rect x="10" y="9" width="14" height="8" rx="4" transform="rotate(-30 17 13)" stroke="#2B3A9E" strokeWidth="2.6" />
-        </svg>
-      </span>
-      <span className="l-display" style={{ fontSize: size }}>Links</span>
-    </span>
-  )
-}
+const FEATURES = [
+  {
+    n: '01',
+    title: 'Research matching',
+    body: 'Professors ranked by how closely their work overlaps with yours, each with a plain explanation of why.',
+    rows: [
+      { left: 'Dr. Maya Reyes', right: '92', accent: true },
+      { left: 'Dr. Anita Patel', right: '88', dim: true },
+    ],
+    serifRight: true,
+  },
+  {
+    n: '02',
+    title: 'Network tracker',
+    body: 'Log every conversation. Get questions to ask next time and a nudge when it is time to follow up.',
+    rows: [
+      { left: 'Priya Nair', right: 'LinkedIn' },
+      { left: 'Marcus Webb', right: 'Career fair' },
+    ],
+  },
+  {
+    n: '03',
+    title: 'Mentor matching',
+    body: 'Alumni and seniors who have walked the path you are working out, matched on goals and background.',
+    rows: [
+      { left: 'Jordan Alvarez', right: "CPP '23" },
+      { left: 'Sofia Tran', right: "CPP '24" },
+    ],
+  },
+] as const
 
-const row = { background: '#fff', borderRadius: 14, padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 } as const
-const avatar = { width: 34, height: 34, borderRadius: 11, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, fontFamily: 'var(--links-font-display)' } as const
-const preview = { flexGrow: 1, minHeight: 190, borderRadius: 18, background: '#F1F4FD', padding: 18, display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center' } as const
+const STEPS = [
+  ['Tell us about you', 'Major, skills, interests and goals. About two minutes.'],
+  ['Read your matches', 'Each comes with questions to ask and a draft message.'],
+  ['Reach out and keep track', 'Log each conversation and let Links remind you to follow up.'],
+]
 
 export default function LandingPage() {
+  const chromeUrl = process.env.NEXT_PUBLIC_CHROME_EXTENSION_URL
+
   return (
     <main>
+      <header className="topbar" style={{ minHeight: 88 }}>
+        <span className="brand" style={{ fontSize: 30 }}>Links</span>
+        <nav className="topnav" aria-label="Main">
+          <Link href="/matches">Research</Link>
+          <Link href="/network">Network</Link>
+          <Link href="/mentors">Mentors</Link>
+          <Link href="/login" style={{ color: 'var(--ink)' }}>Sign in</Link>
+        </nav>
+      </header>
+
       {/* Hero */}
-      <div className="l-hero" style={{ padding: 'clamp(12px, 2.5vw, 40px) clamp(12px, 4vw, 56px) clamp(40px, 6vw, 72px)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <nav className="l-nav l-nav-light" style={{ padding: '10px clamp(16px, 2.5vw, 32px)' }}>
-            <Logo />
-            <div style={{ display: 'flex', gap: 'clamp(16px, 3vw, 48px)', alignItems: 'center' }}>
-              <Link href="/matches">Research</Link>
-              <Link href="/network">Network</Link>
-              <Link href="/mentors">Mentors</Link>
-              <Link href="/login" className="l-btn l-btn-dark" style={{ height: 40, padding: '0 20px' }}>Sign in</Link>
-            </div>
-          </nav>
-
-          <div className="l-center" style={{ paddingTop: 'clamp(40px, 7vw, 88px)' }}>
-            <span className="l-eyebrow-pill">Networking Simplified</span>
-            <h1 className="l-hero-title" style={{ marginBottom: 'clamp(24px, 3vw, 36px)' }}>
-              Career Copilot for <span className="l-accent">Research</span>, <span className="l-accent">Networking</span>, and <span className="l-accent">Mentors</span>.
-            </h1>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
-              {/* Mentor sign-in goes to the same page until mentor accounts exist */}
-              <Link href="/login?role=mentor" className="l-btn l-btn-dark" style={{ borderRadius: 16, height: 52 }}>Mentor Login</Link>
-              <Link href="/login" className="l-btn l-btn-white" style={{ borderRadius: 16, height: 52 }}>Student Login</Link>
-            </div>
-          </div>
-
-          {/* Feature cards */}
-          <div id="features" className="l-grid" style={{ marginTop: 'clamp(40px, 6vw, 72px)' }}>
-            <div className="l-card" style={{ borderRadius: 28, display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <div style={preview}>
-                <div style={row}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ ...avatar, background: '#2B3A9E', color: '#fff' }}>MR</span>
-                    <span><div style={{ fontSize: 13, fontWeight: 700 }}>Dr. Maya Reyes</div><div style={{ fontSize: 11, fontWeight: 600, color: 'var(--links-text-faint)' }}>Applied Perception Lab</div></span>
-                  </span>
-                  <span className="l-chip l-chip-strong">Strong fit</span>
-                </div>
-                <div style={{ ...row, opacity: 0.8 }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ ...avatar, background: '#DCE6FF', color: '#2B3A9E' }}>AP</span>
-                    <span><div style={{ fontSize: 13, fontWeight: 700 }}>Dr. Anita Patel</div><div style={{ fontSize: 11, fontWeight: 600, color: 'var(--links-text-faint)' }}>Human-Centered AI Lab</div></span>
-                  </span>
-                  <span className="l-chip">Good fit</span>
-                </div>
-              </div>
-              <div>
-                <div className="l-h3" style={{ marginBottom: 6 }}>Research matching</div>
-                <div className="l-body">Ranks real CPP professors by overlap with your interests, with a clear explanation for each.</div>
-              </div>
-            </div>
-
-            <div className="l-card" style={{ borderRadius: 28, display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <div style={preview}>
-                {[['Priya Nair', 'LinkedIn', 'Active', 'l-chip-strong'], ['Marcus Webb', 'Career fair', 'Follow up', 'l-chip-neutral'], ['Elena Ruiz', 'Club event', 'New', '']].map(([n, s, st, c]) => (
-                  <div key={n} style={row}>
-                    <span style={{ fontSize: 13, fontWeight: 700, flex: 1 }}>{n}</span>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--links-text-faint)', flex: 1 }}>{s}</span>
-                    <span className={`l-chip ${c}`} style={{ height: 24, padding: '0 10px', fontSize: 11 }}>{st}</span>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <div className="l-h3" style={{ marginBottom: 6 }}>Network tracker</div>
-                <div className="l-body">Log every conversation, get prep questions, and never miss a follow-up.</div>
-              </div>
-            </div>
-
-            <div className="l-card" style={{ borderRadius: 28, display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <div style={preview}>
-                <div style={{ background: '#2B3A9E', borderRadius: 16, padding: 16, color: '#fff' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ ...avatar, background: '#fff', color: '#2B3A9E' }}>JA</span>
-                      <span><div style={{ fontSize: 13, fontWeight: 700 }}>Jordan Alvarez</div><div style={{ fontSize: 11, opacity: 0.7 }}>CPP &apos;23 · Datadog</div></span>
-                    </span>
-                    <span className="l-chip" style={{ background: '#fff', color: '#2B3A9E', height: 24, fontSize: 10.5 }}>Great fit</span>
-                  </div>
-                  <div style={{ fontSize: 12, lineHeight: 1.5, opacity: 0.85 }}>Started in CS wanting research, ended up in backend infra.</div>
-                </div>
-              </div>
-              <div>
-                <div className="l-h3" style={{ marginBottom: 6 }}>Mentor matching</div>
-                <div className="l-body">Get paired with alumni and seniors who have walked the path you are figuring out.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* How it works */}
-      <section className="l-section l-center">
-        <span className="l-chip" style={{ height: 32, padding: '0 16px', marginBottom: 18 }}>How it works</span>
-        <h2 className="l-section-title" style={{ margin: '0 0 12px' }}>Get started in 3 simple steps</h2>
-        <p className="l-body" style={{ margin: '0 0 44px', fontSize: 16 }}>From first profile to first conversation in one sitting.</p>
-        <div className="l-grid" style={{ textAlign: 'left' }}>
-          {[
-            ['1', 'Tell us about you', 'Your major, skills, interests and goals. Takes about two minutes.'],
-            ['2', 'Get your matches', 'See professors ranked for you, each with questions to ask and a draft message.'],
-            ['3', 'Reach out and track it', 'Log each conversation and let Links remind you when it is time to follow up.'],
-          ].map(([n, t, d]) => (
-            <div key={n} className="l-card l-card-soft" style={{ borderRadius: 24, padding: 28 }}>
-              <div className="l-avatar" style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--links-primary)', marginBottom: 18 }}>{n}</div>
-              <div className="l-h3" style={{ marginBottom: 8 }}>{t}</div>
-              <div className="l-body">{d}</div>
-            </div>
-          ))}
+      <section style={{ padding: 'clamp(64px, 10vw, 112px) var(--gutter) clamp(56px, 8vw, 96px)', borderBottom: '1px solid var(--line)' }}>
+        <div className="eyebrow" style={{ marginBottom: 28 }}>For Cal Poly Pomona students</div>
+        <h1 className="display" style={{ maxWidth: 980 }}>
+          Find the people who can open <em className="accent">doors</em> for you.
+        </h1>
+        <p style={{ margin: '32px 0 44px', fontSize: 'clamp(17px, 1.6vw, 19px)', lineHeight: 1.6, color: 'var(--text-3)', maxWidth: 560 }}>
+          Links matches you with professors, keeps track of the people you meet, and pairs you with alumni who have already done what you want to do.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 32 }}>
+          <Link href="/login" className="btn btn-lg">Student login</Link>
+          <Link href="/login?role=mentor" className="link" style={{ fontSize: 15 }}>Mentor login</Link>
         </div>
       </section>
 
-      {/* CTA */}
-      <div style={{ padding: '0 clamp(12px, 4vw, 56px)' }}>
-        <div className="l-center" style={{ maxWidth: 1168, margin: '0 auto', background: 'var(--links-primary)', color: '#fff', borderRadius: 32, padding: 'clamp(36px, 6vw, 64px) 24px' }}>
-          <h2 className="l-section-title" style={{ margin: '0 0 10px' }}>Ready to build your network?</h2>
-          <p style={{ margin: '0 0 22px', fontSize: 15, opacity: 0.88 }}>Free for Cal Poly Pomona students and alumni.</p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/login?mode=signup" className="l-btn l-btn-white" style={{ color: 'var(--links-secondary)', borderRadius: 14 }}>Get started</Link>
-            {/* Set NEXT_PUBLIC_CHROME_EXTENSION_URL to the Chrome Web Store
-                listing once the extension is published. */}
-            {process.env.NEXT_PUBLIC_CHROME_EXTENSION_URL ? (
-              <a href={process.env.NEXT_PUBLIC_CHROME_EXTENSION_URL} target="_blank" rel="noreferrer" className="l-btn l-btn-dark" style={{ borderRadius: 14 }}>
-                Add to Chrome
-              </a>
-            ) : null}
+      {/* Three features, divided by vertical lines */}
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', borderBottom: '1px solid var(--line)' }}>
+        {FEATURES.map((f, i) => (
+          <div
+            key={f.n}
+            style={{
+              padding: `56px clamp(24px, 3vw, 40px) 64px ${i === 0 ? 'var(--gutter)' : 'clamp(24px, 3vw, 40px)'}`,
+              borderLeft: i === 0 ? 'none' : '1px solid var(--line)',
+            }}
+          >
+            <div className="num" style={{ marginBottom: 56 }}>{f.n}</div>
+            <h2 className="serif" style={{ margin: '0 0 14px', fontSize: 36 }}>{f.title}</h2>
+            <p className="body-copy" style={{ marginBottom: 32 }}>{f.body}</p>
+            <div className="rows">
+              {f.rows.map((r) => (
+                <div key={r.left} className="row row-tight row-split" style={{ fontSize: 14, color: 'dim' in r && r.dim ? '#777' : undefined }}>
+                  <span>{r.left}</span>
+                  {'serifRight' in f ? (
+                    <span className="serif" style={{ fontSize: 20, color: 'accent' in r && r.accent ? 'var(--accent)' : undefined }}>{r.right}</span>
+                  ) : (
+                    <span style={{ color: '#777' }}>{r.right}</span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
+        ))}
+      </section>
 
-      <footer style={{ maxWidth: 1280, margin: '0 auto', padding: '40px clamp(16px, 4vw, 56px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, fontSize: 13, fontWeight: 600, color: 'var(--links-text-faint)' }}>
-        <Logo size={20} />
-        <span>Built by a CPP student, for CPP students. · <Link href="/privacy" style={{ textDecoration: 'underline' }}>Privacy</Link></span>
+      {/* How it works */}
+      <section style={{ padding: 'clamp(64px, 8vw, 96px) var(--gutter)', display: 'flex', flexWrap: 'wrap', gap: 'clamp(32px, 7vw, 96px)', borderBottom: '1px solid var(--line)' }}>
+        <h2 className="serif" style={{ margin: 0, fontSize: 'clamp(40px, 5vw, 56px)', lineHeight: 1.05, width: 380, maxWidth: '100%' }}>How it works</h2>
+        <ol className="rows" style={{ flex: 1, minWidth: 'min(100%, 420px)', listStyle: 'none', margin: 0, padding: 0 }}>
+          {STEPS.map(([t, d], i) => (
+            <li key={t} className="row" style={{ display: 'flex', gap: 32, padding: '28px 0' }}>
+              <span className="num" style={{ width: 32, paddingTop: 6 }}>{i + 1}</span>
+              <div>
+                <div className="serif" style={{ fontSize: 28, marginBottom: 6 }}>{t}</div>
+                <div className="body-copy">{d}</div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* Closing call to action */}
+      <section style={{ padding: 'clamp(72px, 9vw, 112px) var(--gutter)', textAlign: 'center' }}>
+        <h2 className="serif" style={{ margin: '0 0 32px', fontSize: 'clamp(44px, 6vw, 64px)', lineHeight: 1.05 }}>
+          Start with one <em className="accent">conversation</em>.
+        </h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 28 }}>
+          <Link href="/login?mode=signup" className="btn btn-lg">Get started</Link>
+          {/* Set NEXT_PUBLIC_CHROME_EXTENSION_URL to the Chrome Web Store
+              listing once the extension is published. */}
+          {chromeUrl ? (
+            <a href={chromeUrl} target="_blank" rel="noreferrer" className="link" style={{ fontSize: 15 }}>Add to Chrome</a>
+          ) : null}
+        </div>
+      </section>
+
+      <footer className="topbar" style={{ borderBottom: 'none', borderTop: '1px solid var(--line)', fontSize: 13, color: 'var(--muted)' }}>
+        <span className="brand" style={{ fontSize: 20, color: 'var(--ink)' }}>Links</span>
+        <span>
+          Built by a CPP student, for CPP students. · <Link href="/privacy" className="link-quiet" style={{ fontSize: 13, textDecoration: 'underline' }}>Privacy</Link>
+        </span>
       </footer>
     </main>
   )

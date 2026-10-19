@@ -7,8 +7,8 @@ export default function CopyButton({ text }: { text: string }) {
   return (
     <button
       type="button"
-      className="l-btn l-btn-dark"
-      style={{ height: 34, padding: '0 16px', fontSize: 12.5 }}
+      className="link"
+      style={{ fontSize: 13 }}
       onClick={async () => {
         await navigator.clipboard.writeText(text)
         setCopied(true)

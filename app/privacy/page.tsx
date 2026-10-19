@@ -13,8 +13,8 @@ const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <h2 className="l-h3" style={{ margin: 0 }}>{title}</h2>
-      <div className="l-body" style={{ fontSize: 15.5, color: 'var(--links-text)', display: 'flex', flexDirection: 'column', gap: 10 }}>{children}</div>
+      <h2 className="serif" style={{ margin: 0, fontSize: 28 }}>{title}</h2>
+      <div style={{ fontSize: 15.5, lineHeight: 1.7, color: 'var(--text-2)', display: 'flex', flexDirection: 'column', gap: 10 }}>{children}</div>
     </section>
   )
 }
@@ -23,9 +23,9 @@ export default function PrivacyPage() {
   return (
     <main style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(24px, 5vw, 64px) 16px', display: 'flex', flexDirection: 'column', gap: 28 }}>
       <div>
-        <Link href="/" className="l-display" style={{ fontSize: 19, color: 'var(--links-secondary)' }}>Links</Link>
-        <h1 className="l-page-title" style={{ margin: '16px 0 6px' }}>Privacy policy</h1>
-        <p className="l-body" style={{ margin: 0 }}>Last updated {UPDATED}. Covers the Links website and the Links Chrome extension.</p>
+        <Link href="/" className="brand">Links</Link>
+        <h1 className="title" style={{ margin: '32px 0 12px' }}>Privacy policy</h1>
+        <p className="meta" style={{ margin: 0 }}>Last updated {UPDATED}. Covers the Links website and the Links Chrome extension.</p>
       </div>
 
       <Section title="What Links stores">
@@ -72,7 +72,7 @@ export default function PrivacyPage() {
         <p style={{ margin: 0 }}>
           Delete any contact from its page in your network; its timeline and drafts go with it.
           {CONTACT_EMAIL ? (
-            <> To delete your whole account, email <a href={`mailto:${CONTACT_EMAIL}`} style={{ fontWeight: 800, color: 'var(--links-secondary)' }}>{CONTACT_EMAIL}</a> from the address you signed up with.</>
+            <> To delete your whole account, email <a href={`mailto:${CONTACT_EMAIL}`} className="link">{CONTACT_EMAIL}</a> from the address you signed up with.</>
           ) : (
             <> To delete your whole account, contact us through the email on the Links Chrome Web Store listing.</>
           )}
