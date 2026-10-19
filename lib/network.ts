@@ -3,6 +3,7 @@
 // ("Log this interaction") and mentor chats ("Log it").
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { embed } from '@/lib/embeddings'
+import { spendCredit } from '@/lib/credits'
 import { refreshContactContent } from '@/lib/generate-network-content'
 
 type ContactFields = {
@@ -53,6 +54,8 @@ export async function findOrCreateContact(supabase: SupabaseClient, userId: stri
 // Adds a timeline entry, bumps "last contact", and regenerates the summary,
 // questions and follow-up draft from the updated log. Pass refresh: false
 // to skip the (slow) regeneration when the caller schedules it itself.
+// Regeneration costs an AI credit; with none left the interaction still
+// saves and the old summary stays until tomorrow.
 export async function recordInteraction(
   supabase: SupabaseClient,
   contactId: string,
@@ -67,5 +70,5 @@ export async function recordInteraction(
   if (error) throw new Error(`Could not log interaction: ${error.message}`)
 
   await supabase.from('network_contacts').update({ last_interaction_at: now, updated_at: now }).eq('id', contactId)
-  if (refresh) await refreshContactContent(contactId, supabase, studentName)
+  if (refresh && (await spendCredit(supabase))) await refreshContactContent(contactId, supabase, studentName)
 }

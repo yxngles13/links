@@ -36,7 +36,7 @@ export async function login(formData: FormData) {
   // content even after a successful login, depending on what's cached.
   revalidatePath('/', 'layout')
   if (mentor) redirect('/mentor')
-  redirect(role === 'mentor' ? '/mentor/profile' : '/matches')
+  redirect(role === 'mentor' ? '/mentor/profile' : '/dashboard')
 }
 
 export async function signup(formData: FormData) {
@@ -50,7 +50,7 @@ export async function signup(formData: FormData) {
   // waiting for it, regardless of that dashboard setting.
   const origin = (await headers()).get('origin')
   const role = formData.get('role') === 'mentor' ? 'mentor' : 'student'
-  const next = role === 'mentor' ? '/mentor/profile' : '/onboarding'
+  const next = role === 'mentor' ? '/mentor/profile' : '/dashboard'
   const back = role === 'mentor' ? '/login?role=mentor&' : '/login?'
 
   const { error } = await supabase.auth.signUp({

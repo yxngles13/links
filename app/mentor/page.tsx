@@ -1,5 +1,6 @@
 // app/mentor/page.tsx
 // Mentor dashboard: incoming requests, upcoming chats, past mentees.
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import AppNav from '@/components/AppNav'
 import { requireUser } from '@/lib/auth'
@@ -89,7 +90,7 @@ export default async function MentorDashboardPage() {
                   <li key={r.id} className="row" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px 24px', padding: '20px 0' }}>
                     <div style={{ flex: 1, minWidth: 'min(100%, 320px)' }}>
                       <div>
-                        <span className="name-sm" style={{ fontSize: 26 }}>{r.student_name ?? 'A student'}</span>{' '}
+                        <Link href={`/profile/${r.student_user_id}`} className="name-sm" style={{ fontSize: 26 }}>{r.student_name ?? 'A student'}</Link>{' '}
                         <span style={{ fontSize: 13, color: 'var(--muted)' }}>{[r.student_summary, r.topic].filter(Boolean).join(' · ')}</span>
                       </div>
                       {r.message ? <p className="body-copy" style={{ color: 'var(--text-2)', marginTop: 4, maxWidth: 520 }}>“{r.message}”</p> : null}
@@ -120,7 +121,7 @@ export default async function MentorDashboardPage() {
             <ul className="rows" style={{ listStyle: 'none', margin: '0 0 28px', padding: 0 }}>
               {scheduled.map((r) => (
                 <li key={r.id} className="row row-tight">
-                  <div className="name-sm" style={{ fontSize: 22 }}>{r.student_name}</div>
+                  <Link href={`/profile/${r.student_user_id}`} className="name-sm" style={{ fontSize: 22, display: 'block' }}>{r.student_name}</Link>
                   <div style={{ fontSize: 13, color: 'var(--muted)' }}>{[formatChatTime(r.scheduled_at!), r.topic].filter(Boolean).join(' · ')}</div>
                   {r.isPast ? (
                     <form action={completeChatAsMentor} style={{ marginTop: 8 }}>

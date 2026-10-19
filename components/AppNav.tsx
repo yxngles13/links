@@ -1,10 +1,11 @@
 // components/AppNav.tsx
 // Top bar: serif wordmark left, plain text links right, active link
-// underlined. Students get Research / Network / Mentors; mentor accounts
+// underlined. Students get Home / Research / Network / Mentors / Profile; mentor accounts
 // get their own two-item nav.
 import Link from 'next/link'
+import CreditsBadge from '@/components/CreditsBadge'
 
-type Tab = 'research' | 'network' | 'mentors' | 'profile' | 'mentor-dashboard' | 'mentor-profile'
+type Tab = 'home' | 'research' | 'network' | 'mentors' | 'profile' | 'mentor-dashboard' | 'mentor-profile'
 
 function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
@@ -14,12 +15,12 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
   )
 }
 
-export default function AppNav({ active = 'research' }: { active?: Tab }) {
+export default function AppNav({ active = 'home' }: { active?: Tab }) {
   const isMentor = active === 'mentor-dashboard' || active === 'mentor-profile'
 
   return (
     <header className="topbar">
-      <Link href={isMentor ? '/mentor' : '/matches'} className="brand">
+      <Link href={isMentor ? '/mentor' : '/dashboard'} className="brand">
         Links{isMentor ? <small>Mentor</small> : null}
       </Link>
       <nav className="topnav" aria-label="Main">
@@ -30,10 +31,12 @@ export default function AppNav({ active = 'research' }: { active?: Tab }) {
           </>
         ) : (
           <>
+            <NavLink href="/dashboard" active={active === 'home'}>Home</NavLink>
             <NavLink href="/matches" active={active === 'research'}>Research</NavLink>
             <NavLink href="/network" active={active === 'network'}>Network</NavLink>
             <NavLink href="/mentors" active={active === 'mentors'}>Mentors</NavLink>
-            <NavLink href="/onboarding" active={active === 'profile'}>Profile</NavLink>
+            <NavLink href="/profile" active={active === 'profile'}>Profile</NavLink>
+            <CreditsBadge />
           </>
         )}
       </nav>

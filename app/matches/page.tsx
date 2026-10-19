@@ -1,6 +1,7 @@
 // app/matches/page.tsx
 import Link from 'next/link'
 import AppNav from '@/components/AppNav'
+import ProfileReminder from '@/components/ProfileReminder'
 import { requireUser } from '@/lib/auth'
 
 const LABEL_TEXT = { strong: 'Strong', moderate: 'Good', exploratory: 'Possible' } as const
@@ -21,7 +22,7 @@ export default async function MatchesPage() {
       <>
         <h1 className="title" style={{ marginBottom: 16 }}>Your matches</h1>
         <p className="body-copy" style={{ marginBottom: 24 }}>You need a profile before we can find matches.</p>
-        <Link href="/onboarding" className="btn btn-lg">Set up your profile</Link>
+        <Link href="/profile#matching" className="btn btn-lg">Set up your profile</Link>
       </>
     )
   } else {
@@ -43,7 +44,7 @@ export default async function MatchesPage() {
         <>
           <h1 className="title" style={{ marginBottom: 16 }}>Your matches</h1>
           <p className="body-copy">
-            No matches yet. <Link href="/onboarding" className="link">Update your profile</Link> to generate some.
+            No matches yet. <Link href="/profile#matching" className="link">Update your profile</Link> to generate some.
           </p>
         </>
       )
@@ -93,6 +94,7 @@ export default async function MatchesPage() {
   return (
     <>
       <AppNav active="research" />
+      <ProfileReminder />
       <div className="shell">
         <main className="main">{body}</main>
         <aside className="aside">

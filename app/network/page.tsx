@@ -1,6 +1,7 @@
 // app/network/page.tsx
 import Link from 'next/link'
 import AppNav from '@/components/AppNav'
+import ProfileReminder from '@/components/ProfileReminder'
 import AddContactDialog from '@/components/AddContactDialog'
 import LinkedInLink from '@/components/LinkedInLink'
 import { requireUser } from '@/lib/auth'
@@ -57,6 +58,7 @@ export default async function NetworkPage({
   return (
     <>
       <AppNav active="network" />
+      <ProfileReminder />
       <main className="page">
         <div className="head-row">
           <div>
