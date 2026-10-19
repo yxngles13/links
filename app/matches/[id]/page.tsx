@@ -5,6 +5,8 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import AppNav from '@/components/AppNav'
 import CopyButton from '@/components/CopyButton'
+import SubmitButton from '@/components/SubmitButton'
+import { logMatchInteraction, toggleSaved } from '../actions'
 
 function Fact({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -15,16 +17,24 @@ function Fact({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
-export default async function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function MatchDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ error?: string }>
+}) {
   const { id } = await params
+  const { error } = await searchParams
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
 
   // Row Level Security already restricts this to the signed-in student's matches.
+  // `*` so this keeps working whether or not the saved_at migration has run.
   const { data: match } = await supabase
     .from('match_recommendations')
     .select(
-      `id, explanation, suggested_questions, outreach_draft,
+      `*,
        opportunities ( professor_name, department, lab_name, project_description,
                        time_commitment_hours, prerequisites, preferred_contact_method, is_available )`
     )
@@ -32,7 +42,16 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
     .single()
 
   if (!match) notFound()
-  const opp = match.opportunities as any
+  const opp = match.opportunities as {
+    professor_name: string
+    department: string | null
+    lab_name: string | null
+    project_description: string | null
+    time_commitment_hours: number | null
+    prerequisites: string | null
+    preferred_contact_method: string | null
+    is_available: boolean | null
+  } | null
 
   return (
     <div className="l-page">
@@ -47,9 +66,11 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
             </div>
           </div>
 
+          {error ? <div className="l-card l-card-soft" style={{ color: '#a01818', fontWeight: 600 }}>{error}</div> : null}
+
           {match.explanation ? (
             <div className="l-card l-card-tint" style={{ borderRadius: 22 }}>
-              <div className="l-eyebrow" style={{ color: 'var(--links-secondary)', marginBottom: 10 }}>Why this match</div>
+              <div className="l-eyebrow" style={{ color: 'var(--links-secondary)', marginBottom: 10 }}>Briefing</div>
               <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.7 }}>{match.explanation}</p>
             </div>
           ) : null}
@@ -87,6 +108,27 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
             {opp?.preferred_contact_method ? <Fact label="Preferred contact" value={opp.preferred_contact_method} /> : null}
             <Fact label="Available" value={opp?.is_available ? 'Yes' : 'Not currently'} />
           </div>
+
+          <form action={logMatchInteraction} className="l-card l-card-soft" style={{ borderRadius: 22, padding: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <input type="hidden" name="match_id" value={match.id} />
+            <label htmlFor="log-notes" className="l-label">Reached out?</label>
+            <select name="interaction_type" aria-label="How you reached out" className="l-input l-input-sm" style={{ background: '#fff' }} defaultValue="Email">
+              <option>Email</option>
+              <option>Office hours</option>
+              <option>Meeting</option>
+              <option>Reply received</option>
+            </select>
+            <textarea id="log-notes" name="notes" rows={3} required placeholder="Sent the outreach email, asked about the fall project…" className="l-textarea l-input-sm" style={{ background: '#fff', resize: 'vertical' }} />
+            <SubmitButton pendingText="Logging…">Log this interaction</SubmitButton>
+            <p className="l-hint" style={{ fontSize: 12 }}>Adds {opp?.professor_name} to your network with a follow-up draft.</p>
+          </form>
+
+          <form action={toggleSaved}>
+            <input type="hidden" name="match_id" value={match.id} />
+            <button type="submit" className="l-btn l-btn-white" style={{ width: '100%', height: 50, border: '1.5px solid var(--links-tint-3)' }}>
+              {match.saved_at ? 'Saved · remove' : 'Save for later'}
+            </button>
+          </form>
         </aside>
       </div>
     </div>
