@@ -9,15 +9,18 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { embed } from '@/lib/embeddings'
 import { generateMatchContent } from '@/lib/generate-match-content'
+import { staleMatchIds, type PromptAnswer } from '@/lib/profile'
 
 type StudentProfile = {
   id: string
+  user_id: string
   major: string | null
   academic_year: string | null
   coursework: string[] | null
   technical_skills: string[] | null
   research_interests: string[] | null
   career_goals: string | null
+  headline?: string | null
 }
 
 function toEmbeddingText(p: StudentProfile): string {
@@ -25,7 +28,10 @@ function toEmbeddingText(p: StudentProfile): string {
   // idea, different fields. Whatever isn't included here is invisible to
   // the matching algorithm, so if you add a new onboarding field later and
   // want it to affect matching, it has to get pulled in here too.
+  // The headline is included, the personality prompts deliberately aren't:
+  // "my ideal lab vibe is chaotic" shouldn't move anyone up or down the list.
   const lines: string[] = []
+  if (p.headline) lines.push(`Headline: ${p.headline}`)
   if (p.major) lines.push(`Major: ${p.major}`)
   if (p.research_interests?.length) lines.push(`Research interests: ${p.research_interests.join(', ')}`)
   if (p.technical_skills?.length) lines.push(`Technical skills: ${p.technical_skills.join(', ')}`)
@@ -48,7 +54,7 @@ function toCompatibilityLabel(similarity: number): 'strong' | 'moderate' | 'expl
 export async function generateMatchesForStudent(studentProfileId: string, supabase: SupabaseClient) {
   const { data: profile, error: profileError } = await supabase
     .from('student_profiles')
-    .select('id, major, academic_year, coursework, technical_skills, research_interests, career_goals')
+    .select('id, user_id, major, academic_year, coursework, technical_skills, research_interests, career_goals')
     .eq('id', studentProfileId)
     .single()
 
@@ -56,7 +62,17 @@ export async function generateMatchesForStudent(studentProfileId: string, supaba
     throw new Error(`Could not load student profile ${studentProfileId}: ${profileError?.message}`)
   }
 
-  const embedding = await embed(toEmbeddingText(profile))
+  // Headline and personality prompts live on the public profile. Missing
+  // table or row (migration not run, profile never filled in) just means
+  // matching runs on the questions alone, as before.
+  const { data: about } = await supabase
+    .from('student_public_profiles')
+    .select('headline, prompts')
+    .eq('user_id', profile.user_id)
+    .maybeSingle()
+  const student = { ...profile, headline: about?.headline ?? null, prompts: (about?.prompts ?? []) as PromptAnswer[] }
+
+  const embedding = await embed(toEmbeddingText(student))
 
   // Cache the student's own embedding so it doesn't need to be
   // regenerated every time matches are refreshed.
@@ -90,7 +106,7 @@ export async function generateMatchesForStudent(studentProfileId: string, supaba
     // Sequential, not Promise.all — deliberately gentle on Groq's free-tier
     // rate limit (30 requests/minute shared across your whole account), and
     // it means one failed generation doesn't take the others down with it.
-    const content = await generateMatchContent(profile, m)
+    const content = await generateMatchContent(student, m)
 
     rows.push({
       student_profile_id: studentProfileId,
@@ -109,6 +125,20 @@ export async function generateMatchesForStudent(studentProfileId: string, supaba
 
   if (insertError) {
     throw new Error(`Could not save match recommendations: ${insertError.message}`)
+  }
+
+  // Matching now re-runs whenever the questions change, so professors that
+  // dropped out of the new results are removed instead of piling up with
+  // stale scores. Saved and contacted ones stay.
+  const [{ data: existing }, { data: contacted }] = await Promise.all([
+    supabase.from('match_recommendations').select('id, opportunity_id, saved_at').eq('student_profile_id', studentProfileId),
+    supabase.from('interactions').select('opportunity_id').eq('student_profile_id', studentProfileId),
+  ])
+  const keep = new Set([...rows.map((r) => r.opportunity_id), ...(contacted ?? []).map((i) => i.opportunity_id)])
+  const stale = staleMatchIds(existing ?? [], keep)
+  if (stale.length) {
+    const { error: deleteError } = await supabase.from('match_recommendations').delete().in('id', stale)
+    if (deleteError) console.error('Could not remove stale matches:', deleteError.message)
   }
 
   return rows
