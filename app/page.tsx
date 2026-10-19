@@ -28,9 +28,9 @@ export default function LandingPage() {
           <nav className="l-nav l-nav-light" style={{ padding: '10px clamp(16px, 2.5vw, 32px)' }}>
             <Logo />
             <div style={{ display: 'flex', gap: 'clamp(16px, 3vw, 48px)', alignItems: 'center' }}>
-              <a href="#features">Research</a>
-              <a href="#features">Network</a>
-              <a href="#features">Mentors</a>
+              <Link href="/matches">Research</Link>
+              <Link href="/network">Network</Link>
+              <Link href="/mentors">Mentors</Link>
               <Link href="/login" className="l-btn l-btn-dark" style={{ height: 40, padding: '0 20px' }}>Sign in</Link>
             </div>
           </nav>
@@ -42,8 +42,8 @@ export default function LandingPage() {
             </h1>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
               {/* Mentor sign-in goes to the same page until mentor accounts exist */}
-              <Link href="/login" className="l-btn l-btn-dark" style={{ borderRadius: 16, height: 52 }}>Mentor Login</Link>
-              <Link href="/login?mode=signup" className="l-btn l-btn-white" style={{ borderRadius: 16, height: 52 }}>Student Login</Link>
+              <Link href="/login?role=mentor" className="l-btn l-btn-dark" style={{ borderRadius: 16, height: 52 }}>Mentor Login</Link>
+              <Link href="/login" className="l-btn l-btn-white" style={{ borderRadius: 16, height: 52 }}>Student Login</Link>
             </div>
           </div>
 
