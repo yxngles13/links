@@ -17,10 +17,8 @@ export type MentorProfile = {
   availability: string | null
   preferred_format: string | null
   is_accepting: boolean
+  linkedin_url?: string | null
 }
-
-export const MENTOR_COLUMNS =
-  'id, user_id, full_name, grad_year, job_title, company, mentor_topics, bio, availability, preferred_format, is_accepting'
 
 export const MENTOR_TOPICS = [
   'Resume review',
@@ -58,8 +56,12 @@ export function mentorSubtitle(m: Pick<MentorProfile, 'grad_year' | 'job_title' 
 }
 
 export async function getOwnMentorProfile(supabase: SupabaseClient, userId: string) {
-  const { data } = await supabase.from('mentor_profiles').select(MENTOR_COLUMNS).eq('user_id', userId).maybeSingle()
-  return data as MentorProfile | null
+  // `*` rather than a column list so this keeps working whether or not the
+  // linkedin_url migration has run.
+  const { data } = await supabase.from('mentor_profiles').select('*').eq('user_id', userId).maybeSingle()
+  if (!data) return null
+  delete data.profile_embedding // a 384-number vector nothing on the page needs
+  return data as MentorProfile
 }
 
 // Returns accepting mentors ranked for this student, best first. Mentors
@@ -67,7 +69,7 @@ export async function getOwnMentorProfile(supabase: SupabaseClient, userId: stri
 export async function rankMentorsForStudent(supabase: SupabaseClient, userId: string) {
   const [{ data: student }, { data: mentors, error }] = await Promise.all([
     supabase.from('student_profiles').select('profile_embedding').eq('user_id', userId).maybeSingle(),
-    supabase.from('mentor_profiles').select(`${MENTOR_COLUMNS}, profile_embedding`).eq('is_accepting', true).neq('user_id', userId),
+    supabase.from('mentor_profiles').select('*').eq('is_accepting', true).neq('user_id', userId),
   ])
   if (error) throw new Error(error.message)
 

@@ -57,6 +57,12 @@ export default async function MentorProfilePage({ searchParams }: { searchParams
             </div>
           </div>
 
+          <div className="field">
+            <label htmlFor="linkedin_url">LinkedIn profile</label>
+            <input id="linkedin_url" name="linkedin_url" type="url" placeholder="https://www.linkedin.com/in/…" defaultValue={existing?.linkedin_url ?? ''} className="input" />
+            <p className="hint">Students see this next to your name so they can look you up before a chat.</p>
+          </div>
+
           <fieldset className="field">
             <legend>What you can mentor on</legend>
             <div className="choices">

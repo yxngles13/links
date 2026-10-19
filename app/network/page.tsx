@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import AppNav from '@/components/AppNav'
 import AddContactDialog from '@/components/AddContactDialog'
+import LinkedInLink from '@/components/LinkedInLink'
 import { requireUser } from '@/lib/auth'
 import { embed } from '@/lib/embeddings'
 import { needsFollowUp, timeAgo } from '@/lib/format'
@@ -14,6 +15,7 @@ type Contact = {
   company: string | null
   met_context: string | null
   tags: string[] | null
+  linkedin_url: string | null
   last_interaction_at: string | null
   contact_embedding: unknown
 }
@@ -32,7 +34,7 @@ export default async function NetworkPage({
 
   const { data } = await supabase
     .from('network_contacts')
-    .select('id, full_name, role, company, met_context, tags, last_interaction_at, contact_embedding')
+    .select('id, full_name, role, company, met_context, tags, linkedin_url, last_interaction_at, contact_embedding')
     .order('last_interaction_at', { ascending: false, nullsFirst: false })
   const all = (data ?? []) as Contact[]
 
@@ -89,11 +91,12 @@ export default async function NetworkPage({
             <table className="table">
               <thead>
                 <tr>
-                  <th style={{ width: '32%' }}>Contact</th>
-                  <th style={{ width: '17%' }}>How you met</th>
-                  <th style={{ width: '19%' }}>Tags</th>
-                  <th style={{ width: '14%' }}>Last contact</th>
-                  <th style={{ width: '18%' }}>Status</th>
+                  <th style={{ width: '29%' }}>Contact</th>
+                  <th style={{ width: '15%' }}>How you met</th>
+                  <th style={{ width: '17%' }}>Tags</th>
+                  <th style={{ width: '13%' }}>Last contact</th>
+                  <th style={{ width: '15%' }}>Status</th>
+                  <th style={{ width: '11%' }}>LinkedIn</th>
                 </tr>
               </thead>
               <tbody>
@@ -109,6 +112,13 @@ export default async function NetworkPage({
                       <td>{(c.tags ?? []).join(', ')}</td>
                       <td>{timeAgo(c.last_interaction_at)}</td>
                       <td className={stale ? 'accent' : undefined}>{stale ? 'Needs follow-up' : 'On track'}</td>
+                      <td>
+                        {c.linkedin_url ? (
+                          <LinkedInLink url={c.linkedin_url} name={c.full_name} style={{ fontSize: 13 }} />
+                        ) : (
+                          <Link href={`/network/${c.id}#linkedin`} className="link-quiet" style={{ fontSize: 13 }}>Add</Link>
+                        )}
+                      </td>
                     </tr>
                   )
                 })}

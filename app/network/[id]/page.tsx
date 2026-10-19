@@ -6,9 +6,23 @@ import CopyButton from '@/components/CopyButton'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser } from '@/lib/auth'
 import { needsFollowUp, timeAgo } from '@/lib/format'
-import { deleteContact, logInteraction } from '../actions'
+import LinkedInLink from '@/components/LinkedInLink'
+import { deleteContact, logInteraction, setContactLinkedIn } from '../actions'
 
 const INTERACTION_TYPES = ['LinkedIn message', 'Email', 'Call', 'Coffee chat', 'Meeting', 'Note']
+
+function LinkedInForm({ id, current }: { id: string; current: string | null }) {
+  return (
+    <form action={setContactLinkedIn} style={{ display: 'flex', gap: 12, alignItems: 'flex-end', marginTop: current ? 10 : 0 }}>
+      <input type="hidden" name="contact_id" value={id} />
+      <div className="field" style={{ flex: 1 }}>
+        <label htmlFor={`li-${id}`}>LinkedIn</label>
+        <input id={`li-${id}`} name="linkedin_url" type="url" defaultValue={current ?? ''} placeholder="https://www.linkedin.com/in/…" className="input" style={{ fontSize: 14 }} />
+      </div>
+      <button type="submit" className="link" style={{ fontSize: 13 }}>Save</button>
+    </form>
+  )
+}
 
 export default async function ContactPage({
   params,
@@ -53,7 +67,10 @@ export default async function ContactPage({
             Last contact {timeAgo(contact.last_interaction_at).toLowerCase()} · <span className={stale ? 'accent' : undefined}>{stale ? 'Time to follow up' : 'On track'}</span>
           </div>
           <h1 className="title-sm" style={{ marginBottom: 4 }}>{contact.full_name}</h1>
-          <div className="meta" style={{ marginBottom: 22 }}>{[contact.role, contact.company].filter(Boolean).join(' · ')}</div>
+          <div className="meta" style={{ marginBottom: 22, display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
+            <span>{[contact.role, contact.company].filter(Boolean).join(' · ')}</span>
+            <LinkedInLink url={contact.linkedin_url} name={contact.full_name} style={{ fontSize: 14 }} />
+          </div>
 
           {error ? <div className="alert" role="alert">{error}</div> : null}
           {summary?.summary ? <p className="lead" style={{ marginBottom: 26 }}>{summary.summary}</p> : null}
@@ -117,11 +134,19 @@ export default async function ContactPage({
           <div className="rows">
             {contact.met_context ? <div className="row row-tight row-split" style={{ fontSize: 14 }}><span className="muted">Met via</span>{contact.met_context}</div> : null}
             {contact.tags?.length ? <div className="row row-tight row-split" style={{ fontSize: 14 }}><span className="muted">Tags</span>{contact.tags.join(', ')}</div> : null}
-            {contact.linkedin_url ? (
-              <div className="row row-tight">
-                <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="link">View LinkedIn</a>
-              </div>
-            ) : null}
+            <div className="row row-tight" id="linkedin">
+              {contact.linkedin_url ? (
+                <div className="row-split" style={{ fontSize: 14 }}>
+                  <LinkedInLink url={contact.linkedin_url} name={contact.full_name} />
+                  <details className="details">
+                    <summary className="link-quiet" style={{ fontSize: 13 }}>Change</summary>
+                    <LinkedInForm id={contact.id} current={contact.linkedin_url} />
+                  </details>
+                </div>
+              ) : (
+                <LinkedInForm id={contact.id} current={null} />
+              )}
+            </div>
           </div>
 
           <details className="details" style={{ marginTop: 32 }}>
