@@ -49,3 +49,6 @@ CLAUDE.md
 
 # brainstorming mockups
 .superpowers/
+
+# Claude Code personal settings
+.claude/settings.local.json
