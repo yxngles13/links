@@ -1,12 +1,12 @@
 // components/AppNav.tsx
 // Top bar: serif wordmark left, plain text links right, active link
-// underlined. Students get Home / Research / Network / Mentors / Profile; mentor accounts
+// underlined. Students get Home / Research / Network / Mentors / Plans / Profile; mentor accounts
 // get their own two-item nav.
 import Link from 'next/link'
 import CreditsBadge from '@/components/CreditsBadge'
 import FeedbackSurvey from '@/components/FeedbackSurvey'
 
-type Tab = 'home' | 'research' | 'network' | 'mentors' | 'profile' | 'mentor-dashboard' | 'mentor-profile'
+type Tab = 'home' | 'research' | 'network' | 'mentors' | 'plans' | 'profile' | 'mentor-dashboard' | 'mentor-profile'
 
 function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
@@ -37,6 +37,7 @@ export default function AppNav({ active = 'home' }: { active?: Tab }) {
             <NavLink href="/matches" active={active === 'research'}>Research</NavLink>
             <NavLink href="/network" active={active === 'network'}>Network</NavLink>
             <NavLink href="/mentors" active={active === 'mentors'}>Mentors</NavLink>
+            <NavLink href="/plans" active={active === 'plans'}>Plans</NavLink>
             <NavLink href="/profile" active={active === 'profile'}>Profile</NavLink>
             <FeedbackSurvey />
             <CreditsBadge />

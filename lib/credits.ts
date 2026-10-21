@@ -7,16 +7,23 @@
 //
 // Until the migration is run, credits are off (everything is allowed), so
 // the app keeps working exactly as before.
+//
+// Paused for testing: credits only apply when AI_CREDITS=on. While paused,
+// every AI action is allowed and nothing is counted or shown, the same as
+// before the migration. The table and functions stay in the database.
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { isMissingTable } from '@/components/MigrationNotice'
 
 export const DAILY_CREDITS = 5 // keep in sync with the migration
+
+const creditsPaused = () => process.env.AI_CREDITS !== 'on'
 
 // PGRST202 = PostgREST can't find the function (migration not run).
 const isMissingFunction = (error: { code?: string; message?: string }) =>
   error.code === 'PGRST202' || isMissingTable(error) || /could not find the function/i.test(error.message ?? '')
 
 export async function spendCredit(supabase: SupabaseClient): Promise<boolean> {
+  if (creditsPaused()) return true
   const { data, error } = await supabase.rpc('spend_ai_credit')
   if (error) {
     if (isMissingFunction(error)) return true
@@ -27,8 +34,9 @@ export async function spendCredit(supabase: SupabaseClient): Promise<boolean> {
   return data === true
 }
 
-// null = credits aren't set up yet (nothing to show).
+// null = credits are paused or aren't set up yet (nothing to show).
 export async function creditsLeft(supabase: SupabaseClient): Promise<number | null> {
+  if (creditsPaused()) return null
   const { data, error } = await supabase.rpc('ai_credits_left')
   if (error) return null
   return typeof data === 'number' ? data : null
