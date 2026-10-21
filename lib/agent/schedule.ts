@@ -41,11 +41,17 @@ export function schedule(
     if (s.done && s.day === today) used[today] = (used[today] ?? 0) + s.minutes
   }
   // Pinned steps keep their day (even a past one) and use up its capacity.
+  const pinnedUsed: Record<string, number> = {}
   for (const s of live) {
-    if (s.pinned && s.day) { days[s.id] = s.day; claim(s, s.day) }
+    if (s.pinned && s.day) {
+      days[s.id] = s.day; claim(s, s.day)
+      pinnedUsed[s.day] = (pinnedUsed[s.day] ?? 0) + s.minutes
+    }
   }
+  // "Over your time" is about what the student pinned, not work they already
+  // finished (today's capacity has already shrunk for the hours gone by).
   // Only window days have a capacity, so past or off-window pinned days are never reported.
-  const overloaded = Object.keys(used).filter(d => d in capacity && used[d] > capacity[d]).sort()
+  const overloaded = Object.keys(pinnedUsed).filter(d => d in capacity && pinnedUsed[d] > capacity[d]).sort()
 
   // Everything else, in plan order then step order. `prev` is the plan's previous step's day;
   // once a step is Later, the rest of its plan is Later too.

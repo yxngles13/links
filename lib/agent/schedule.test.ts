@@ -104,3 +104,12 @@ test('editing a step pins it only when its day changes', () => {
   assert.equal(pinAfterEdit({ day: null, pinned: false }, TODAY), true)
   assert.equal(pinAfterEdit({ day: TODAY, pinned: true }, null), false) // cleared: unpinned
 })
+test('finished work today never makes a pinned step look over time', () => {
+  // 60/day: 45 min done this morning, then a 30-min step pinned to today.
+  // Together they pass 60, but the pinned step alone fits, so no warning.
+  const steps = [
+    step({ minutes: 45, day: TODAY, done: true }),
+    step({ planId: 'p2', minutes: 30, day: TODAY, pinned: true }),
+  ]
+  assert.deepEqual(schedule(steps, daily(60), TODAY).overloaded, [])
+})
