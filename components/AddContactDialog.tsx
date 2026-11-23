@@ -12,7 +12,7 @@ export default function AddContactDialog({ openOnLoad = false }: { openOnLoad?: 
 
   return (
     <>
-      <button type="button" className="btn" onClick={() => ref.current?.showModal()}>
+      <button type="button" className="btn btn-accent" onClick={() => ref.current?.showModal()}>
         Add contact
       </button>
 
@@ -24,9 +24,9 @@ export default function AddContactDialog({ openOnLoad = false }: { openOnLoad?: 
         className="dialog"
         aria-labelledby="add-contact-title"
       >
-        <div className="row-split" style={{ alignItems: 'baseline', marginBottom: 24 }}>
-          <h2 id="add-contact-title" className="serif" style={{ margin: 0, fontSize: 34 }}>Add to network</h2>
-          <button type="button" className="link-quiet" style={{ fontSize: 13 }} onClick={() => ref.current?.close()}>
+        <div className="row-split" style={{ marginBottom: 20 }}>
+          <h2 id="add-contact-title" className="dialog-title">Add to network</h2>
+          <button type="button" className="link-quiet" onClick={() => ref.current?.close()}>
             Close
           </button>
         </div>
@@ -73,7 +73,7 @@ export default function AddContactDialog({ openOnLoad = false }: { openOnLoad?: 
           </div>
 
           <div style={{ marginTop: 6 }}>
-            <SubmitButton className="btn" pendingText="Saving and drafting a follow-up…">Save contact</SubmitButton>
+            <SubmitButton className="btn btn-accent btn-block" pendingText="Saving and drafting a follow-up…">Save contact</SubmitButton>
           </div>
         </form>
       </dialog>

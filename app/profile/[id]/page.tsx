@@ -42,9 +42,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
           linkedin={profile.linkedin_url}
           github={profile.github_url}
         />
-        <div style={{ paddingTop: 16 }}>
-          {profile.prompts.length ? <ProfilePrompts prompts={profile.prompts} /> : <p className="body-copy" style={{ paddingTop: 24 }}>Nothing here yet.</p>}
-        </div>
+        {profile.prompts.length ? <ProfilePrompts prompts={profile.prompts} /> : <p className="body-copy" style={{ paddingTop: 24 }}>Nothing here yet.</p>}
       </main>
     </>
   )

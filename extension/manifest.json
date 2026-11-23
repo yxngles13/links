@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Links — Add to network",
   "short_name": "Links",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Save the person you just met to your Links network, from any page. Prefills from LinkedIn profiles.",
   "action": {
     "default_title": "Add to Links network",

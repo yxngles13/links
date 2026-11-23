@@ -3,7 +3,7 @@
 // when there's no (safe) URL, so callers can drop it in unconditionally.
 import { httpUrl } from '@/lib/format'
 
-export default function LinkedInLink({ url, name, className = 'link', style }: { url: string | null | undefined; name: string; className?: string; style?: React.CSSProperties }) {
+export default function LinkedInLink({ url, name, className = 'link li-link', style }: { url: string | null | undefined; name: string; className?: string; style?: React.CSSProperties }) {
   const href = httpUrl(url)
   if (!href) return null
   return (

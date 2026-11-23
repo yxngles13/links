@@ -9,6 +9,7 @@ import { displayName, requireUser } from '@/lib/auth'
 import { gettingStartedSteps, greeting } from '@/lib/dashboard'
 import { needsFollowUp, timeAgo } from '@/lib/format'
 import { displayScore } from '@/lib/similarity'
+import { pastelFor, scoreTier } from '@/lib/theme'
 import { getPublicProfile } from '@/lib/student-profile'
 
 type Match = {
@@ -27,9 +28,9 @@ function dueFollowUps(contacts: Contact[], now = Date.now()) {
 
 function Section({ title, href, cta, children }: { title: string; href: string; cta: string; children: React.ReactNode }) {
   return (
-    <section style={{ borderTop: '1px solid var(--ink)', paddingTop: 16 }}>
-      <div className="row-split" style={{ alignItems: 'baseline', marginBottom: 12 }}>
-        <h2 className="label" style={{ margin: 0, color: 'var(--ink)' }}>{title}</h2>
+    <section className="card">
+      <div className="card-head">
+        <h2>{title}</h2>
         <Link href={href} className="link" style={{ fontSize: 13 }}>{cta} →</Link>
       </div>
       {children}
@@ -89,110 +90,125 @@ export default async function DashboardPage() {
     <>
       <AppNav active="home" />
       <ProfileReminder />
-      <main className="page" style={{ maxWidth: 1120 }}>
-        <h1 className="title" style={{ marginBottom: 10 }}>
-          {greeting()}, <em className="accent">{firstName}</em>.
-        </h1>
-        <p className="meta" style={{ marginBottom: 36 }}>
-          {upNext.length ? `${upNext.length} thing${upNext.length === 1 ? '' : 's'} need${upNext.length === 1 ? 's' : ''} you this week.` : 'Nothing urgent. A good day to reach out to someone new.'}
-        </p>
-
+      <main className="page" style={{ maxWidth: 1280 }}>
         {/* Hidden until NEXT_PUBLIC_CHROME_EXTENSION_URL is set to the Web Store listing. */}
         {chromeUrl ? <ExtensionCard storeUrl={chromeUrl} /> : null}
 
-        {doneCount < steps.length ? (
-          <section aria-labelledby="start-title" style={{ marginBottom: 48 }}>
-            <div className="row-split" style={{ alignItems: 'baseline', marginBottom: 8 }}>
-              <h2 id="start-title" className="name" style={{ margin: 0 }}>Getting started</h2>
-              <span className="num">{doneCount} of {steps.length} done</span>
-            </div>
-            <div aria-hidden style={{ height: 2, background: 'var(--line)', marginBottom: 4 }}>
-              <div style={{ height: 2, width: `${(doneCount / steps.length) * 100}%`, background: 'var(--accent)' }} />
-            </div>
-            <ol className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-              {steps.map((s, i) => (
-                <li key={s.key} className="row numbered" style={{ alignItems: 'center', opacity: s.done ? 0.55 : 1 }}>
-                  <span className="num">{s.done ? '✓' : String(i + 1).padStart(2, '0')}</span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 500, textDecoration: s.done ? 'line-through' : undefined }}>{s.title}</div>
-                    {!s.done ? <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>{s.why}</div> : null}
-                  </div>
-                  {!s.done ? <Link href={s.href} className="btn btn-sm btn-outline">{s.cta}</Link> : null}
-                </li>
-              ))}
-            </ol>
-          </section>
-        ) : null}
-
-        <div className="stats">
-          <div className="stat"><span className="serif">{matches.length}</span><span>professor matches</span></div>
-          <div className="stat"><span className="serif">{contactedIds.size}</span><span>contacted</span></div>
-          <div className="stat"><span className="serif">{contacts.length}</span><span>in your network</span></div>
-          <div className="stat"><span className="serif" style={{ color: dueContacts.length ? 'var(--accent)' : undefined }}>{dueContacts.length}</span><span>follow-ups due</span></div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))', gap: '40px 56px' }}>
-          <Section title="Up next" href="/follow-ups" cta="Follow-ups">
-            {upNext.length ? (
-              <ul className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {upNext.map((u) => (
-                  <li key={u.key}>
-                    <Link href={u.href} className="row row-tight" style={{ display: 'block' }}>
-                      <div style={{ fontSize: 15 }}>{u.text}</div>
-                      {u.meta ? <div style={{ fontSize: 13, color: 'var(--muted)' }}>{u.meta}</div> : null}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="body-copy" style={{ fontSize: 14 }}>No follow-ups waiting.</p>
-            )}
-          </Section>
-
-          <Section title="Research" href="/matches" cta="All matches">
-            {matches.length ? (
-              <ul className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {matches.slice(0, 3).map((m) => (
-                  <li key={m.id}>
-                    <Link href={`/matches/${m.id}`} className="row row-tight row-split">
-                      <span style={{ minWidth: 0 }}>
-                        <span className="name-sm" style={{ fontSize: 20, display: 'block' }}>{m.opportunities?.professor_name}</span>
-                        <span style={{ fontSize: 13, color: 'var(--muted)' }}>
-                          {[m.opportunities?.lab_name ?? m.opportunities?.department, contactedIds.has(m.opportunity_id) && 'Contacted', m.saved_at && 'Saved'].filter(Boolean).join(' · ')}
-                        </span>
-                      </span>
-                      <span className="serif" style={{ fontSize: 28 }}>{displayScore(m.similarity_score ?? 0)}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="body-copy" style={{ fontSize: 14 }}>
-                {student ? 'No matches yet.' : 'Answer a few questions and your professor matches show up here.'}{' '}
-                <Link href="/professors" className="link">Browse all professors</Link>
+        <div className="home-grid">
+          <div className="home-col">
+            <div className="hero-card">
+              <svg className="hero-star" viewBox="0 0 120 120" aria-hidden="true"><path d="M60 8l13 33 35 3-27 22 9 35-30-19-30 19 9-35L12 44l35-3z" fill="#fff" /></svg>
+              <p className="hero-hello">{greeting()}</p>
+              <h1>Hi, {firstName}!</h1>
+              <p className="hero-lead">
+                {upNext.length ? `${upNext.length} thing${upNext.length === 1 ? '' : 's'} need${upNext.length === 1 ? 's' : ''} you this week.` : 'Nothing urgent. A good day to reach out to someone new.'}
               </p>
-            )}
-          </Section>
+            </div>
 
-          <Section title="Network" href="/network" cta="All contacts">
-            {contacts.length ? (
-              <ul className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {[...contacts].reverse().slice(0, 3).map((c) => (
-                  <li key={c.id}>
-                    <Link href={`/network/${c.id}`} className="row row-tight row-split">
-                      <span style={{ minWidth: 0 }}>
-                        <span style={{ display: 'block', fontSize: 15 }}>{c.full_name}</span>
-                        <span style={{ fontSize: 13, color: 'var(--muted)' }}>{[c.role, c.company].filter(Boolean).join(' · ')}</span>
-                      </span>
-                      <span className="num">{timeAgo(c.last_interaction_at)}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="body-copy" style={{ fontSize: 14 }}>Met someone at a career fair or on LinkedIn? Add them and we&apos;ll remind you to follow up.</p>
-            )}
-          </Section>
+            {doneCount < steps.length ? (
+              <section aria-labelledby="start-title" className="card">
+                <div className="card-head" style={{ marginBottom: 12 }}>
+                  <h2 id="start-title">Getting started</h2>
+                  <span className="num" style={{ fontSize: 14 }}>{doneCount} of {steps.length} done</span>
+                </div>
+                <div className="progress" aria-hidden="true">
+                  <div style={{ width: `${(doneCount / steps.length) * 100}%` }} />
+                </div>
+                <ol className="steps">
+                  {steps.map((s, i) => (
+                    <li key={s.key} className={s.done ? 'step step-done' : 'step'}>
+                      <span className="step-dot">{s.done ? '✓' : i + 1}</span>
+                      <div className="step-body">
+                        <div className="step-title">{s.title}</div>
+                        {!s.done ? <div className="step-why">{s.why}</div> : null}
+                        {!s.done ? <Link href={s.href} className="btn btn-sm">{s.cta}</Link> : null}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ) : null}
+
+            <div className="stats home-stats">
+              <div className="stat-tile"><span className="stat-num">{matches.length}</span><span>matches</span></div>
+              <div className="stat-tile"><span className="stat-num">{contacts.length}</span><span>in network</span></div>
+              <div className="stat-tile"><span className={dueContacts.length ? 'stat-num accent' : 'stat-num'}>{dueContacts.length}</span><span>follow-ups due</span></div>
+            </div>
+          </div>
+
+          <div className="home-col">
+            <section className="card" aria-labelledby="top-title">
+              <div className="card-head card-head-lg">
+                <h2 id="top-title">Your top professors</h2>
+                <Link href="/matches" className="link" style={{ fontSize: 13 }}>All matches →</Link>
+              </div>
+              {matches.length ? (
+                <ul className="match-grid" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                  {matches.slice(0, 4).map((m) => {
+                    const name = m.opportunities?.professor_name ?? ''
+                    const tier = scoreTier(m.similarity_score ?? 0)
+                    const sub = [m.opportunities?.lab_name ?? m.opportunities?.department, contactedIds.has(m.opportunity_id) && 'Contacted', m.saved_at && 'Saved'].filter(Boolean).join(' · ')
+                    return (
+                      <li key={m.id} className={`match-card card-${pastelFor(name)}`}>
+                        <div className="match-top">
+                          <div>
+                            <h3 className="match-name"><Link href={`/matches/${m.id}`}>{name}</Link></h3>
+                            {sub ? <p className="match-sub">{sub}</p> : null}
+                          </div>
+                          <span className={`badge badge-score badge-${tier}`}>
+                            <span className="badge-num">{displayScore(m.similarity_score ?? 0)}</span>
+                            <span className="badge-tier">{tier}</span>
+                          </span>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              ) : (
+                <p className="body-copy" style={{ fontSize: 14 }}>
+                  {student ? 'No matches yet.' : 'Answer a few questions and your professor matches show up here.'}{' '}
+                  <Link href="/professors" className="link">Browse all professors</Link>
+                </p>
+              )}
+            </section>
+
+            <Section title="Up next" href="/follow-ups" cta="Follow-ups">
+              {upNext.length ? (
+                <ul className="rows rows-flat" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                  {upNext.map((u) => (
+                    <li key={u.key}>
+                      <Link href={u.href} className="row row-tight" style={{ display: 'block' }}>
+                        <div style={{ fontSize: 15, fontWeight: 700 }}>{u.text}</div>
+                        {u.meta ? <div style={{ fontSize: 13, color: 'var(--muted)' }}>{u.meta}</div> : null}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="body-copy" style={{ fontSize: 14 }}>No follow-ups waiting.</p>
+              )}
+            </Section>
+
+            <Section title="Network" href="/network" cta="All contacts">
+              {contacts.length ? (
+                <ul className="rows rows-flat" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                  {[...contacts].reverse().slice(0, 3).map((c) => (
+                    <li key={c.id}>
+                      <Link href={`/network/${c.id}`} className="row row-tight row-split">
+                        <span style={{ minWidth: 0 }}>
+                          <span style={{ display: 'block', fontSize: 15, fontWeight: 700 }}>{c.full_name}</span>
+                          <span style={{ fontSize: 13, color: 'var(--muted)' }}>{[c.role, c.company].filter(Boolean).join(' · ')}</span>
+                        </span>
+                        <span className="num">{timeAgo(c.last_interaction_at)}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="body-copy" style={{ fontSize: 14 }}>Met someone at a career fair or on LinkedIn? Add them and we&apos;ll remind you to follow up.</p>
+              )}
+            </Section>
+          </div>
         </div>
       </main>
     </>

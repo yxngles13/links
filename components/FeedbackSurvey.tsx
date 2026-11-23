@@ -81,7 +81,7 @@ export default function FeedbackSurvey() {
           <div>
             <h2 id="feedback-title" className="serif" style={{ margin: '0 0 12px', fontSize: 34 }}>Thank you.</h2>
             <p className="body-copy" style={{ marginBottom: 24 }}>Every answer gets read. It&apos;s how Links gets better.</p>
-            <button type="button" className="btn" onClick={() => ref.current?.close()}>Close</button>
+            <button type="button" className="btn btn-accent" onClick={() => ref.current?.close()}>Close</button>
           </div>
         ) : (
           <form
@@ -148,7 +148,7 @@ export default function FeedbackSurvey() {
             </div>
 
             <div>
-              <SubmitButton className="btn" pendingText="Sending…">Send feedback</SubmitButton>
+              <SubmitButton className="btn btn-accent" pendingText="Sending…">Send feedback</SubmitButton>
             </div>
           </form>
         )}

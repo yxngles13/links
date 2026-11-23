@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, Inter } from "next/font/google";
+import { Fredoka, Nunito } from "next/font/google";
 import "./globals.css";
 
-const instrumentSerif = Instrument_Serif({
-  weight: "400",
-  style: ["normal", "italic"],
+// Fredoka for headings, numbers and the wordmark; Nunito for everything else.
+const fredoka = Fredoka({
+  weight: ["500", "600", "700"],
   subsets: ["latin"],
-  variable: "--font-instrument-serif",
+  variable: "--font-fredoka",
 });
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const nunito = Nunito({
+  weight: ["400", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-nunito",
+});
 
 export const metadata: Metadata = {
   title: "Links",
@@ -17,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${instrumentSerif.variable} ${inter.variable}`}>
+    <html lang="en" className={`${fredoka.variable} ${nunito.variable}`}>
       <body>{children}</body>
     </html>
   );

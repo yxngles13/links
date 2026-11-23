@@ -43,7 +43,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       <main className="page" style={{ maxWidth: 960 }}>
         {error ? <div className="alert" role="alert">{error}</div> : null}
         {missing ? (
-          <div className="notice" style={{ marginBottom: 32 }}>
+          <div className="notice" style={{ marginBottom: 20 }}>
             <div className="label" style={{ marginBottom: 8 }}>Setup needed</div>
             <p className="body-copy">
               Profiles need their database table. Run <code>{PROFILE_MIGRATION}</code> in the Supabase SQL Editor, then reload
@@ -61,12 +61,12 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           github={profile?.github_url ?? null}
         />
 
-        <section aria-labelledby="about-title" style={{ padding: '40px 0', borderBottom: '1px solid var(--line)' }}>
-          <div className="head-row" style={{ alignItems: 'baseline' }}>
-            <h2 id="about-title" className="name" style={{ margin: 0 }}>About you</h2>
+        <section aria-labelledby="about-title" className="card profile-section">
+          <div className="head-row">
+            <h2 id="about-title">About you</h2>
             <span className="meta">Anyone signed in to Links can see this part.</span>
           </div>
-          {saved === 'about' ? <p className="meta accent" role="status" style={{ marginTop: -12, marginBottom: 20 }}>Saved.</p> : null}
+          {saved === 'about' ? <p className="saved-note" role="status">Saved.</p> : null}
 
           <form action={saveAbout} className="form">
             <div className="form-row">
@@ -82,9 +82,9 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
 
             <fieldset className="field">
               <legend>Pick {MAX_PROMPTS} questions and answer in a line</legend>
-              <div className="rows">
+              <div className="prompt-edit">
                 {promptRows.map((p, i) => (
-                  <div key={i} className="row form-row" style={{ gap: '12px 32px' }}>
+                  <div key={i} className="prompt-edit-row">
                     <select name="prompt_key" aria-label={`Question ${i + 1}`} defaultValue={p.key} className="input">
                       <option value="">Choose a question…</option>
                       {PROFILE_PROMPTS.map((q) => <option key={q.key} value={q.key}>{q.text}</option>)}
@@ -125,18 +125,18 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           </form>
         </section>
 
-        <section id="matching" aria-labelledby="matching-title" style={{ padding: '40px 0', scrollMarginTop: 24 }}>
-          <div className="head-row" style={{ alignItems: 'baseline' }}>
-            <h2 id="matching-title" className="name" style={{ margin: 0 }}>
-              What you want to <em className="accent">work on</em>
+        <section id="matching" aria-labelledby="matching-title" className="card profile-section" style={{ scrollMarginTop: 24 }}>
+          <div className="head-row">
+            <h2 id="matching-title">
+              What you want to <span className="accent">work on</span>
             </h2>
             <span className="meta">Only you see this. We use it to find professors whose work overlaps with yours.</span>
           </div>
           {saved === 'matching' ? (
-            <p className="meta accent" role="status" style={{ marginTop: -12, marginBottom: 20 }}>Saved. Your matches are refreshing in the background.</p>
+            <p className="saved-note" role="status">Saved. Your matches are refreshing in the background.</p>
           ) : null}
           {saved === 'matching-nocredit' ? (
-            <p className="meta accent" role="status" style={{ marginTop: -12, marginBottom: 20 }}>
+            <p className="saved-note" role="status">
               Saved. {OUT_OF_CREDITS} Save again then to refresh your matches.
             </p>
           ) : null}

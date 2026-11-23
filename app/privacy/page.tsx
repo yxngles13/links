@@ -3,7 +3,7 @@
 // Store requires one because the extension handles personal information.
 // Keep it in sync with what the code actually does.
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import { Brand } from '@/components/AppNav'
 
 export const metadata: Metadata = { title: 'Privacy policy · Links' }
 
@@ -12,19 +12,19 @@ const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <h2 className="serif" style={{ margin: 0, fontSize: 28 }}>{title}</h2>
-      <div style={{ fontSize: 15.5, lineHeight: 1.7, color: 'var(--text-2)', display: 'flex', flexDirection: 'column', gap: 10 }}>{children}</div>
+    <section className="card legal-section">
+      <h2 className="legal-h2">{title}</h2>
+      <div className="legal-body">{children}</div>
     </section>
   )
 }
 
 export default function PrivacyPage() {
   return (
-    <main style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(24px, 5vw, 64px) 16px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+    <main className="legal">
       <div>
-        <Link href="/" className="brand">Links</Link>
-        <h1 className="title" style={{ margin: '32px 0 12px' }}>Privacy policy</h1>
+        <Brand href="/" />
+        <h1 className="title legal-title">Privacy policy</h1>
         <p className="meta" style={{ margin: 0 }}>Last updated {UPDATED}. Covers the Links website and the Links Chrome extension.</p>
       </div>
 

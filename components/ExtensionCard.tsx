@@ -33,18 +33,18 @@ export default function ExtensionCard({ storeUrl }: { storeUrl: string }) {
   return (
     <section
       aria-labelledby="extension-title"
-      className="row-split"
-      style={{ flexWrap: 'wrap', alignItems: 'center', gap: '16px 32px', border: '1px solid var(--line-strong)', padding: '22px 26px', marginBottom: 48 }}
+      className="card card-peach row-split"
+      style={{ flexWrap: 'wrap', alignItems: 'center', gap: '16px 32px', marginBottom: 28 }}
     >
       <div style={{ minWidth: 0, flex: '1 1 320px' }}>
-        <div className="eyebrow accent" style={{ marginBottom: 6 }}>New · Chrome extension</div>
+        <div className="eyebrow" style={{ color: 'var(--peach-ink)', marginBottom: 6 }}>New · Chrome extension</div>
         <h2 id="extension-title" className="name" style={{ margin: '0 0 4px' }}>Add people straight from LinkedIn</h2>
-        <p className="body-copy" style={{ fontSize: 14, margin: 0 }}>
+        <p className="body-copy" style={{ fontSize: 14, margin: 0, color: 'var(--ink)' }}>
           Click the Links icon on someone&apos;s profile and they&apos;re in your network, with a follow-up reminder. No copying and pasting.
         </p>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <a href={storeUrl} target="_blank" rel="noreferrer" className="btn" onClick={dismiss}>Add to Chrome</a>
+        <a href={storeUrl} target="_blank" rel="noreferrer" className="btn btn-accent" onClick={dismiss}>Add to Chrome</a>
         <button type="button" className="link-quiet" onClick={dismiss}>Not now</button>
       </div>
     </section>

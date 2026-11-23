@@ -10,9 +10,9 @@ export default async function CreditsBadge() {
   if (left === null) return null
   return (
     <span
-      className="num"
+      className={left === 0 ? 'tag tag-peach' : 'tag tag-butter'}
       title="Each AI action (refreshing matches, drafting a follow-up, …) uses one. They reset at midnight."
-      style={{ color: left === 0 ? 'var(--danger)' : undefined, whiteSpace: 'nowrap' }}
+      style={{ color: left === 0 ? 'var(--peach-ink)' : undefined, whiteSpace: 'nowrap', fontSize: 13 }}
     >
       {left === 0 ? 'No AI credits left today' : `${left} of ${DAILY_CREDITS} AI credits left`}
     </span>

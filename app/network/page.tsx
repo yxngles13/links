@@ -4,8 +4,9 @@ import AddContactDialog from '@/components/AddContactDialog'
 import LinkedInLink from '@/components/LinkedInLink'
 import { requireUser } from '@/lib/auth'
 import { embed } from '@/lib/embeddings'
-import { needsFollowUp, timeAgo } from '@/lib/format'
+import { initials, needsFollowUp, timeAgo } from '@/lib/format'
 import { cosine, parseVector } from '@/lib/similarity'
+import { pastelFor } from '@/lib/theme'
 
 type Contact = {
   id: string
@@ -64,10 +65,13 @@ export default async function NetworkPage({
               {followUps ? <> · <Link href="/follow-ups" className="accent">{followUps} need{followUps === 1 ? 's' : ''} a follow-up</Link></> : null}
             </div>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: 28 }}>
-            <form action="/network" role="search" className="field" style={{ width: 320, maxWidth: '100%' }}>
-              <label htmlFor="ask">Ask your network</label>
-              <input id="ask" name="q" defaultValue={query} placeholder="Who can help me break into ML infra?" className="input" style={{ fontSize: 15 }} />
+          <div className="prof-tools net-tools">
+            <form action="/network" role="search" style={{ display: 'contents' }}>
+              <label className="search" htmlFor="ask">
+                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                <span className="sr-only">Ask your network</span>
+                <input id="ask" name="q" defaultValue={query} placeholder="Who can help me break into ML infra?" />
+              </label>
             </form>
             <AddContactDialog openOnLoad={add === '1'} />
           </div>
@@ -85,44 +89,40 @@ export default async function NetworkPage({
             <p className="body-copy">No contacts yet. Add the first person you talked to, from a career fair, a coffee chat or a LinkedIn message.</p>
           </div>
         ) : (
-          <div className="table-wrap">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th style={{ width: '29%' }}>Contact</th>
-                  <th style={{ width: '15%' }}>How you met</th>
-                  <th style={{ width: '17%' }}>Tags</th>
-                  <th style={{ width: '13%' }}>Last contact</th>
-                  <th style={{ width: '15%' }}>Status</th>
-                  <th style={{ width: '11%' }}>LinkedIn</th>
-                </tr>
-              </thead>
-              <tbody>
-                {contacts.map((c) => {
-                  const stale = needsFollowUp(c.last_interaction_at)
-                  return (
-                    <tr key={c.id}>
-                      <td>
-                        <Link href={`/network/${c.id}`} className="name-sm" style={{ display: 'block', color: 'var(--ink)' }}>{c.full_name}</Link>
-                        <span style={{ fontSize: 13, color: 'var(--muted)' }}>{[c.role, c.company].filter(Boolean).join(' · ')}</span>
-                      </td>
-                      <td>{c.met_context}</td>
-                      <td>{(c.tags ?? []).join(', ')}</td>
-                      <td>{timeAgo(c.last_interaction_at)}</td>
-                      <td className={stale ? 'accent' : undefined}>{stale ? 'Needs follow-up' : 'On track'}</td>
-                      <td>
-                        {c.linkedin_url ? (
-                          <LinkedInLink url={c.linkedin_url} name={c.full_name} style={{ fontSize: 13 }} />
-                        ) : (
-                          <Link href={`/network/${c.id}#linkedin`} className="link-quiet" style={{ fontSize: 13 }}>Add</Link>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ul className="prof-grid">
+            {contacts.map((c) => {
+              const stale = needsFollowUp(c.last_interaction_at)
+              const sub = [c.role, c.company].filter(Boolean).join(' · ')
+              return (
+                <li key={c.id} style={{ minWidth: 0 }}>
+                  <article className="card prof-card">
+                    <div className="prof-top">
+                      <span aria-hidden="true" className={`initials-tile initials-tile-${pastelFor(c.full_name)}`}>{initials(c.full_name)}</span>
+                      <div>
+                        <h2 className="prof-name"><Link href={`/network/${c.id}`}>{c.full_name}</Link></h2>
+                        {sub ? <p className="prof-sub">{sub}</p> : null}
+                      </div>
+                    </div>
+                    {c.met_context ? <p className="prof-sub" style={{ margin: 0 }}>Met via {c.met_context}</p> : null}
+                    {c.tags?.length ? (
+                      <div className="tags">{c.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div>
+                    ) : null}
+                    <div className="prof-foot">
+                      <span className="prof-sub" style={{ margin: 0 }}>Last contact {timeAgo(c.last_interaction_at).toLowerCase()}</span>
+                      {stale ? <span className="pill pill-peach">Needs follow-up</span> : <span className="pill pill-mint">On track</span>}
+                    </div>
+                    <div className="prof-foot">
+                      {c.linkedin_url ? (
+                        <LinkedInLink url={c.linkedin_url} name={c.full_name} />
+                      ) : (
+                        <Link href={`/network/${c.id}#linkedin`} className="link-quiet">Add LinkedIn</Link>
+                      )}
+                    </div>
+                  </article>
+                </li>
+              )
+            })}
+          </ul>
         )}
       </main>
     </>

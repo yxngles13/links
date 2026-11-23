@@ -2,8 +2,8 @@
 import Link from 'next/link'
 import { requireUser } from '@/lib/auth'
 import { displayScore } from '@/lib/similarity'
+import { pastelFor, scoreTier } from '@/lib/theme'
 
-const LABEL_TEXT = { strong: 'Strong', moderate: 'Good', exploratory: 'Possible' } as const
 
 type Opportunity = { professor_name: string; department: string | null; lab_name: string | null; research_areas: string[] | null }
 
@@ -58,35 +58,35 @@ export default async function MatchesPage() {
       body = (
         <>
           <h1 className="title" style={{ marginBottom: 10 }}>Your matches</h1>
-          <div className="meta" style={{ marginBottom: 32 }}>
+          <div className="meta" style={{ marginBottom: 24 }}>
             {matches.length} professors · {strong} strong · {contactedIds.size} contacted
           </div>
 
-          <ol className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          <ol className="rank-list">
             {matches.map((m, i) => {
               const opp = m.opportunities as Opportunity | null
-              const fit = (m.compatibility_label ?? 'exploratory') as keyof typeof LABEL_TEXT
-              const tags = [m.picked_at && 'You picked', contactedIds.has(m.opportunity_id) && 'Contacted', m.saved_at && 'Saved'].filter(Boolean).join(' · ')
+              const name = opp?.professor_name ?? ''
+              const tier = scoreTier(m.similarity_score ?? 0)
               return (
-                <li key={m.id}>
-                  <Link href={`/matches/${m.id}`} className="row" style={{ display: 'flex', gap: 28, padding: '26px 0' }}>
-                    <span className="num" style={{ width: 24, paddingTop: 8 }}>{String(i + 1).padStart(2, '0')}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="name" style={{ color: fit === 'exploratory' ? '#444' : undefined }}>{opp?.professor_name}</div>
-                      <div style={{ fontSize: 13.5, color: 'var(--muted)', margin: '2px 0 12px' }}>
-                        {[opp?.department, opp?.lab_name].filter(Boolean).join(' · ')}
+                <li key={m.id} className={`rank-card card-${pastelFor(name)}`}>
+                  <span className="rank-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <div className="rank-body">
+                    <h2 className="rank-name"><Link href={`/matches/${m.id}`}>{name}</Link></h2>
+                    <p className="rank-sub">{[opp?.department, opp?.lab_name].filter(Boolean).join(' · ')}</p>
+                    {m.explanation ? <p className="rank-why">{m.explanation}</p> : null}
+                    {m.picked_at || contactedIds.has(m.opportunity_id) || m.saved_at ? (
+                      <div className="tags" style={{ marginTop: 10 }}>
+                        {m.picked_at ? <span className="pill">You picked</span> : null}
+                        {contactedIds.has(m.opportunity_id) ? <span className="pill">Contacted</span> : null}
+                        {m.saved_at ? <span className="pill">Saved</span> : null}
                       </div>
-                      {m.explanation ? <p className="body-copy" style={{ color: 'var(--text-2)', maxWidth: 560 }}>{m.explanation}</p> : null}
-                      {tags ? <div className="num" style={{ marginTop: 10 }}>{tags}</div> : null}
-                    </div>
-                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      {/* Display score, not raw cosine; see displayScore in lib/similarity.ts. */}
-                      <div className="serif" style={{ fontSize: 44, lineHeight: 1, color: i === 0 ? 'var(--accent)' : fit === 'exploratory' ? '#888' : undefined }}>
-                        {displayScore(m.similarity_score ?? 0)}
-                      </div>
-                      <div className="label" style={{ marginTop: 6 }}>{LABEL_TEXT[fit] ?? 'Match'}</div>
-                    </div>
-                  </Link>
+                    ) : null}
+                  </div>
+                  {/* Display score, not raw cosine; see displayScore in lib/similarity.ts. */}
+                  <span className={`badge badge-score badge-${tier}`}>
+                    <span className="badge-num">{displayScore(m.similarity_score ?? 0)}</span>
+                    <span className="badge-tier">{tier}</span>
+                  </span>
                 </li>
               )
             })}
@@ -100,16 +100,20 @@ export default async function MatchesPage() {
     <>
       <div className="shell">
         <main className="main">{body}</main>
-        <aside className="aside">
-          <div className="label" style={{ marginBottom: 12 }}>A note on scores</div>
-          <p className="body-copy" style={{ fontSize: 14, marginBottom: 40 }}>
-            Scores reflect overlap with your interests and skills. They are not a prediction of acceptance.
-          </p>
-          <div className="label" style={{ marginBottom: 8 }}>Your network</div>
-          <Link href="/network" style={{ display: 'block' }}>
-            <span className="serif" style={{ fontSize: 44, lineHeight: 1, display: 'block' }}>{networkCount ?? 0}</span>
-            <span className="meta" style={{ fontSize: 13 }}>connection{networkCount === 1 ? '' : 's'} started</span>
-          </Link>
+        <aside className="aside side-cards">
+          <section className="card card-lilac">
+            <h2 className="label" style={{ marginBottom: 8 }}>A note on scores</h2>
+            <p className="body-copy" style={{ fontSize: 14 }}>
+              Scores reflect overlap with your interests and skills. They are not a prediction of acceptance.
+            </p>
+          </section>
+          <section className="card">
+            <h2 className="label" style={{ marginBottom: 8 }}>Your network</h2>
+            <Link href="/network" style={{ display: 'block', minHeight: 44 }}>
+              <span className="num" style={{ fontSize: 44, lineHeight: 1, display: 'block', color: 'var(--accent-ink)' }}>{networkCount ?? 0}</span>
+              <span className="meta" style={{ fontSize: 13 }}>connection{networkCount === 1 ? '' : 's'} started</span>
+            </Link>
+          </section>
         </aside>
       </div>
     </>

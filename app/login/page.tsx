@@ -22,16 +22,14 @@ export default async function LoginPage({
   return (
     <main>
       <BrandBar />
-      <div className="shell">
-        <div className="main" style={{ maxWidth: 520, paddingTop: 72 }}>
-          <div className="eyebrow" style={{ marginBottom: 20 }}>{isSignup ? 'Create an account' : 'Sign in'}</div>
-          <h1 className="title-sm" style={{ marginBottom: 20 }}>{heading}</h1>
-          <p className="body-copy">Links is free for Cal Poly Pomona students and alumni.</p>
-        </div>
+      <div className="auth-wrap">
+        <div className="card auth-card">
+          <div className="eyebrow auth-eyebrow">{isSignup ? 'Create an account' : 'Sign in'}</div>
+          <h1 className="title-sm auth-title">{heading}</h1>
+          <p className="body-copy auth-sub">Links is free for Cal Poly Pomona students and alumni.</p>
 
-        <div className="main" style={{ borderLeft: '1px solid var(--line)', paddingTop: 72, maxWidth: 640 }}>
           {params.error ? <div className="alert" role="alert">{params.error}</div> : null}
-          {params.message ? <div className="notice" style={{ marginBottom: 24 }}>{params.message}</div> : null}
+          {params.message ? <div className="notice auth-notice">{params.message}</div> : null}
 
           <form action={isSignup ? signup : login} className="form">
             {isSignup ? (
@@ -48,7 +46,7 @@ export default async function LoginPage({
               <label htmlFor="password">Password</label>
               <input id="password" name="password" type="password" required minLength={6} autoComplete={isSignup ? 'new-password' : 'current-password'} className="input" />
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 28, marginTop: 8 }}>
+            <div className="auth-actions">
               <SubmitButton pendingText={isSignup ? 'Creating account…' : 'Signing in…'}>{isSignup ? 'Create account' : 'Sign in'}</SubmitButton>
               {isSignup ? (
                 <Link href="/login" className="link">I have an account</Link>

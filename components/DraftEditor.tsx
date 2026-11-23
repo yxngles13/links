@@ -14,7 +14,7 @@ function Buttons({ save, rewrite, dirty }: { save: Action; rewrite: Action; dirt
   const rewriteButton = useRef<HTMLButtonElement>(null)
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-end' }}>
-      <button type="submit" formAction={save} className="btn btn-sm btn-outline" disabled={pending || !dirty}>
+      <button type="submit" formAction={save} className="btn btn-sm btn-soft" disabled={pending || !dirty}>
         Save edits
       </button>
       <div className="field" style={{ flex: 1, minWidth: 'min(100%, 240px)' }}>
@@ -35,7 +35,7 @@ function Buttons({ save, rewrite, dirty }: { save: Action; rewrite: Action; dirt
           }}
         />
       </div>
-      <button ref={rewriteButton} type="submit" formAction={rewrite} className="btn btn-sm" disabled={pending}>
+      <button ref={rewriteButton} type="submit" formAction={rewrite} className="btn btn-sm btn-accent" disabled={pending}>
         {pending ? 'Working…' : 'Rewrite · 1 credit'}
       </button>
     </div>
@@ -69,12 +69,12 @@ export default function DraftEditor({
   return (
     <form className="form" style={{ gap: 14 }}>
       <input type="hidden" name={idName} value={idValue} />
-      <div className="row-split" style={{ alignItems: 'baseline' }}>
+      <div className="row-split">
         <label htmlFor={`draft-${idValue}`} className="label">{label}</label>
         <button
           type="button"
-          className="link"
-          style={{ fontSize: 13 }}
+          className="btn btn-sm btn-soft"
+          style={{ fontSize: 14 }}
           disabled={!value.trim()}
           onClick={async () => {
             await navigator.clipboard.writeText(value)
@@ -93,8 +93,7 @@ export default function DraftEditor({
         maxLength={MAX_DRAFT_LENGTH}
         rows={Math.min(16, Math.max(6, value.split('\n').length + 1))}
         placeholder="Write your own message, or have AI draft one below."
-        className="draft"
-        style={{ width: '100%', resize: 'vertical', font: 'inherit', fontSize: 14.5, outline: 'none' }}
+        className="input draft-area"
       />
       <Buttons save={save} rewrite={rewrite} dirty={value !== text} />
     </form>

@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser } from '@/lib/auth'
+import { initials } from '@/lib/format'
+import { pastelFor } from '@/lib/theme'
 import { writeDraft } from '../actions'
 
 type Opportunity = {
@@ -27,7 +29,7 @@ function Fact({ label, children, accent }: { label: string; children: React.Reac
   return (
     <div className="row row-tight fact">
       <span>{label}</span>
-      <span style={{ fontSize: 15, color: accent ? 'var(--accent)' : undefined }}>{children}</span>
+      <span style={{ fontSize: 15, color: accent ? 'var(--accent-ink)' : undefined }}>{children}</span>
     </div>
   )
 }
@@ -56,23 +58,37 @@ export default async function ProfessorPage({
     ? await supabase.from('match_recommendations').select('id').eq('student_profile_id', student.id).eq('opportunity_id', id).maybeSingle()
     : { data: null }
 
+  const pastel = pastelFor(opp.professor_name)
+
   return (
-    <div className="shell">
-      <main className="main">
-        <Link href="/professors" className="back">← All professors</Link>
-        <h1 className="title-sm" style={{ margin: '22px 0 4px' }}>{opp.professor_name}</h1>
-        <div className="meta" style={{ marginBottom: 28 }}>{[opp.department, opp.lab_name].filter(Boolean).join(' · ')}</div>
+    <main className="page">
+      <Link href="/professors" className="back">← All professors</Link>
 
-        {error ? <div className="alert" role="alert">{error}</div> : null}
-        {opp.project_description ? <p className="lead" style={{ marginBottom: 32 }}>{opp.project_description}</p> : null}
+      <div className="prof-detail">
+        <section className="card">
+          <div className="prof-detail-head">
+            <span aria-hidden="true" className={`initials-tile initials-tile-lg initials-tile-${pastel}`}>{initials(opp.professor_name)}</span>
+            <div>
+              <h1>{opp.professor_name}</h1>
+              <div className="meta" style={{ marginTop: 6 }}>{[opp.department, opp.lab_name].filter(Boolean).join(' · ')}</div>
+            </div>
+          </div>
 
-        <section className="measure">
+          {opp.research_areas?.length ? (
+            <div className="tags" style={{ marginBottom: 18 }}>
+              {opp.research_areas.map((a) => <span key={a} className={`tag tag-${pastel}`}>{a}</span>)}
+            </div>
+          ) : null}
+
+          {error ? <div className="alert" role="alert" style={{ marginBottom: 18 }}>{error}</div> : null}
+          {opp.project_description ? <p className="lead" style={{ marginBottom: 24 }}>{opp.project_description}</p> : null}
+
           {match ? (
-            <Link href={`/matches/${match.id}`} className="btn btn-lg">Open your draft →</Link>
+            <Link href={`/matches/${match.id}`} className="btn btn-lg btn-accent">Open your draft →</Link>
           ) : student ? (
             <form action={writeDraft}>
               <input type="hidden" name="opportunity_id" value={opp.id} />
-              <SubmitButton pendingText="Writing your draft…">Write me a draft</SubmitButton>
+              <SubmitButton pendingText="Writing your draft…" className="btn btn-lg btn-accent">Write me a draft</SubmitButton>
             </form>
           ) : (
             <p className="body-copy">
@@ -81,28 +97,27 @@ export default async function ProfessorPage({
             </p>
           )}
         </section>
-      </main>
 
-      <aside className="aside">
-        <div className="label" style={{ marginBottom: 8 }}>Quick facts</div>
-        <div className="rows">
-          {opp.research_areas?.length ? <Fact label="Research areas">{opp.research_areas.join(', ')}</Fact> : null}
-          {opp.desired_skills?.length ? <Fact label="Desired skills">{opp.desired_skills.join(', ')}</Fact> : null}
-          {opp.prerequisites ? <Fact label="Prerequisites">{opp.prerequisites}</Fact> : null}
-          {opp.time_commitment_hours ? <Fact label="Time commitment">{opp.time_commitment_hours} hours a week</Fact> : null}
-          {opp.preferred_contact_method ? <Fact label="Preferred contact">{opp.preferred_contact_method}</Fact> : null}
-          <Fact label="Availability" accent={!!opp.is_available}>{opp.is_available ? 'Taking students' : 'Ask to confirm'}</Fact>
-          {opp.public_resources?.length ? (
-            <Fact label="Links">
-              {opp.public_resources.map((url) => (
-                <a key={url} href={url} target="_blank" rel="noreferrer" className="link" style={{ display: 'block' }}>
-                  {url.replace(/^https?:\/\/(www\.)?/, '')}
-                </a>
-              ))}
-            </Fact>
-          ) : null}
-        </div>
-      </aside>
-    </div>
+        <aside className="card">
+          <h2 className="label" style={{ marginBottom: 8 }}>Quick facts</h2>
+          <div className="rows">
+            {opp.desired_skills?.length ? <Fact label="Desired skills">{opp.desired_skills.join(', ')}</Fact> : null}
+            {opp.prerequisites ? <Fact label="Prerequisites">{opp.prerequisites}</Fact> : null}
+            {opp.time_commitment_hours ? <Fact label="Time commitment">{opp.time_commitment_hours} hours a week</Fact> : null}
+            {opp.preferred_contact_method ? <Fact label="Preferred contact">{opp.preferred_contact_method}</Fact> : null}
+            <Fact label="Availability" accent={!!opp.is_available}>{opp.is_available ? 'Taking students' : 'Ask to confirm'}</Fact>
+            {opp.public_resources?.length ? (
+              <Fact label="Links">
+                {opp.public_resources.map((url) => (
+                  <a key={url} href={url} target="_blank" rel="noreferrer" className="link" style={{ display: 'block', overflowWrap: 'anywhere' }}>
+                    {url.replace(/^https?:\/\/(www\.)?/, '')}
+                  </a>
+                ))}
+              </Fact>
+            ) : null}
+          </div>
+        </aside>
+      </div>
+    </main>
   )
 }

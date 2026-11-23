@@ -21,8 +21,8 @@ export default async function ProfileReminder() {
   if (!missing && !profile?.reminder_seen_at) return <ReminderDialog />
 
   return (
-    <div style={{ borderBottom: '1px solid var(--line)', padding: '12px var(--gutter)' }}>
-      <div style={{ borderLeft: '2px solid var(--accent)', paddingLeft: 14, fontSize: 14, color: 'var(--text-2)' }}>
+    <div style={{ padding: '4px var(--gutter) 0' }}>
+      <div className="notice" style={{ fontSize: 14, padding: '12px 20px', borderRadius: 'var(--radius-pill)' }}>
         Your matches are waiting.{' '}
         <Link href="/profile#matching" className="link">Answer a few questions →</Link>
       </div>

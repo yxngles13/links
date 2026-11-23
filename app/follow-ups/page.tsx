@@ -4,7 +4,8 @@
 // contact's page.
 import Link from 'next/link'
 import { requireUser } from '@/lib/auth'
-import { needsFollowUp, timeAgo } from '@/lib/format'
+import { initials, needsFollowUp, timeAgo } from '@/lib/format'
+import { pastelFor } from '@/lib/theme'
 
 type Contact = { id: string; full_name: string; role: string | null; company: string | null; last_interaction_at: string | null }
 
@@ -32,7 +33,7 @@ export default async function FollowUpsPage() {
   return (
     <main className="page">
       <h1 className="title" style={{ marginBottom: 10 }}>Follow-ups</h1>
-      <div className="meta" style={{ marginBottom: 28 }}>
+      <div className="meta" style={{ marginBottom: 24 }}>
         {due.length ? `${due.length} contact${due.length === 1 ? '' : 's'} waiting on you` : 'Nobody is waiting on you'}
       </div>
 
@@ -44,25 +45,29 @@ export default async function FollowUpsPage() {
           </p>
         </div>
       ) : (
-        <div className="rows measure">
+        <ul className="rank-list measure">
           {due.map((c) => {
             const draft = draftFor.get(c.id)
+            const sub = [c.role, c.company].filter(Boolean).join(' · ')
             return (
-              <Link key={c.id} href={`/network/${c.id}`} className="row">
-                <div className="row-split" style={{ alignItems: 'baseline' }}>
-                  <span className="name-sm">{c.full_name}</span>
-                  <span className="meta accent" style={{ fontSize: 13 }}>Last contact {timeAgo(c.last_interaction_at).toLowerCase()}</span>
-                </div>
-                {c.role || c.company ? (
-                  <div style={{ fontSize: 13, color: 'var(--muted)' }}>{[c.role, c.company].filter(Boolean).join(' · ')}</div>
-                ) : null}
-                <p className="body-copy" style={{ fontSize: 14, margin: '8px 0 0', color: draft ? undefined : 'var(--muted)' }}>
-                  {draft ? preview(draft) : 'No draft yet. Open to write one.'}
-                </p>
-              </Link>
+              <li key={c.id}>
+                <Link href={`/network/${c.id}`} className="card prof-card fu-card">
+                  <div className="prof-top">
+                    <span aria-hidden="true" className={`initials-tile initials-tile-${pastelFor(c.full_name)}`}>{initials(c.full_name)}</span>
+                    <div>
+                      <h2 className="prof-name">{c.full_name}</h2>
+                      {sub ? <p className="prof-sub">{sub}</p> : null}
+                    </div>
+                    <span className="pill pill-peach">Last contact {timeAgo(c.last_interaction_at).toLowerCase()}</span>
+                  </div>
+                  <p className={draft ? 'fu-preview' : 'fu-preview fu-empty'}>
+                    {draft ? preview(draft) : 'No draft yet. Open to write one.'}
+                  </p>
+                </Link>
+              </li>
             )
           })}
-        </div>
+        </ul>
       )}
     </main>
   )
