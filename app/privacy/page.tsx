@@ -38,7 +38,6 @@ export default function PrivacyPage() {
             can see these.
           </li>
           <li>Contacts you add to your network: name, role, company, how you met, tags, notes, an optional LinkedIn URL, and the interactions you log.</li>
-          <li>Mentor profiles and mentorship requests, if you use mentor matching.</li>
         </ul>
       </Section>
 
@@ -67,8 +66,7 @@ export default function PrivacyPage() {
 
       <Section title="Who can see what">
         <p style={{ margin: 0 }}>
-          Your network, notes and matches are visible only to you. If you request a chat with a mentor, that mentor sees your name, your year and
-          major, the topic and your message. Mentors&apos; profiles are visible to signed-in students.
+          Your network, notes and matches are visible only to you.
         </p>
       </Section>
 

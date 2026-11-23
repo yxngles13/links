@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: "Links",
-  description: "Career copilot for research, networking, and mentors.",
+  description: "Career copilot for research and networking.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

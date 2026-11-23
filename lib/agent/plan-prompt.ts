@@ -124,7 +124,7 @@ function starterBlock(s: Starter): string {
   if (p?.technical_skills?.length) lines.push(`Technical skills: ${p.technical_skills.join(', ')}`)
   if (p?.career_goals) lines.push(`Career goals: ${p.career_goals}`)
   lines.push(
-    `Return exactly one new career plan made of beginner steps: look at postings, add people they already know, update the resume, book a mentor chat.`,
+    `Return exactly one new career plan made of beginner steps: look at postings, add people they already know, update the resume, reach out to a professor.`,
   )
   if (!s.role) {
     lines.push(`Since they have no role in mind, the first steps explore roles (read about options, compare them) rather than apply.`)

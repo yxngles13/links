@@ -1,14 +1,12 @@
 // app/dashboard/page.tsx
 // Student home: getting-started steps for new users, what needs doing next
-// (chats, follow-ups), and one highlight per area linking into it.
+// (follow-ups), and one highlight per area linking into it.
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import AppNav from '@/components/AppNav'
 import ProfileReminder from '@/components/ProfileReminder'
 import { displayName, requireUser } from '@/lib/auth'
 import { gettingStartedSteps, greeting } from '@/lib/dashboard'
-import { formatChatTime, needsFollowUp, timeAgo } from '@/lib/format'
-import { getOwnMentorProfile } from '@/lib/mentors'
+import { needsFollowUp, timeAgo } from '@/lib/format'
 import { getPublicProfile } from '@/lib/student-profile'
 
 type Match = {
@@ -19,15 +17,10 @@ type Match = {
   opportunities: { professor_name: string; department: string | null; lab_name: string | null } | null
 }
 type Contact = { id: string; full_name: string; role: string | null; company: string | null; last_interaction_at: string | null }
-type Request = { id: string; status: string; scheduled_at: string | null; topic: string | null; mentor_profiles: { full_name: string } | null }
-type Goal = { id: string; text: string; done: boolean }
 
 // Kept out of the component so "now" is read once per request, not during render.
-function byTime(contacts: Contact[], requests: Request[], now = Date.now()) {
-  return {
-    dueContacts: contacts.filter((c) => needsFollowUp(c.last_interaction_at, now)),
-    upcomingChats: requests.filter((r) => r.status === 'scheduled' && r.scheduled_at && new Date(r.scheduled_at).getTime() > now),
-  }
+function dueFollowUps(contacts: Contact[], now = Date.now()) {
+  return contacts.filter((c) => needsFollowUp(c.last_interaction_at, now))
 }
 
 function Section({ title, href, cta, children }: { title: string; href: string; cta: string; children: React.ReactNode }) {
@@ -44,13 +37,12 @@ function Section({ title, href, cta, children }: { title: string; href: string; 
 
 export default async function DashboardPage() {
   const { supabase, user } = await requireUser()
-  if (await getOwnMentorProfile(supabase, user.id).catch(() => null)) redirect('/mentor')
 
   const { data: student } = await supabase.from('student_profiles').select('id').eq('user_id', user.id).maybeSingle()
 
   // Every area is optional: a missing table or a new account just shows an
   // empty block instead of breaking home.
-  const [{ profile }, matchesRes, contactedRes, contactsRes, requestsRes, goalsRes] = await Promise.all([
+  const [{ profile }, matchesRes, contactedRes, contactsRes] = await Promise.all([
     getPublicProfile(supabase, user.id).catch(() => ({ profile: null })),
     student
       ? supabase
@@ -61,50 +53,26 @@ export default async function DashboardPage() {
       : Promise.resolve({ data: [] }),
     student ? supabase.from('interactions').select('opportunity_id').eq('student_profile_id', student.id) : Promise.resolve({ data: [] }),
     supabase.from('network_contacts').select('id, full_name, role, company, last_interaction_at').order('last_interaction_at', { ascending: true, nullsFirst: true }),
-    supabase
-      .from('mentorship_requests')
-      .select('id, status, scheduled_at, topic, mentor_profiles ( full_name )')
-      .eq('student_user_id', user.id)
-      .order('scheduled_at', { ascending: true }),
-    supabase.from('student_goals').select('id, text, done').eq('user_id', user.id).order('created_at').order('id'),
   ])
 
   const matches = (matchesRes.data ?? []) as unknown as Match[]
   const contactedIds = new Set((contactedRes.data ?? []).map((i: { opportunity_id: string }) => i.opportunity_id))
   const contacts = (contactsRes.data ?? []) as Contact[]
-  const requests = (requestsRes.data ?? []) as unknown as Request[]
-  const goals = (goalsRes.data ?? []) as Goal[]
 
   const saved = matches.filter((m) => m.saved_at).length
-  const { dueContacts, upcomingChats } = byTime(contacts, requests)
-  const needsTime = requests.filter((r) => r.status === 'accepted')
-  const pending = requests.filter((r) => r.status === 'requested').length
-  const openGoals = goals.filter((g) => !g.done)
+  const dueContacts = dueFollowUps(contacts)
 
   const steps = gettingStartedSteps({
     hasAbout: !!(profile?.headline || profile?.prompts.length),
     hasAnswers: !!student,
     hasActedOnMatch: saved > 0 || contactedIds.size > 0,
     contacts: contacts.length,
-    mentorRequests: requests.length,
   })
   const doneCount = steps.filter((s) => s.done).length
   const firstName = (profile?.full_name || displayName(user)).split(' ')[0]
 
-  // "Up next": things with a time or a nudge attached, soonest first.
+  // "Up next": people waiting on a follow-up, longest wait first.
   const upNext = [
-    ...upcomingChats.map((r) => ({
-      key: r.id,
-      text: `Chat with ${r.mentor_profiles?.full_name ?? 'your mentor'}`,
-      meta: [formatChatTime(r.scheduled_at!), r.topic].filter(Boolean).join(' · '),
-      href: '/mentors',
-    })),
-    ...needsTime.map((r) => ({
-      key: r.id,
-      text: `${r.mentor_profiles?.full_name ?? 'A mentor'} accepted. Pick a time`,
-      meta: r.topic ?? '',
-      href: '/mentors',
-    })),
     ...dueContacts.slice(0, 3).map((c) => ({
       key: c.id,
       text: `Follow up with ${c.full_name}`,
@@ -154,11 +122,10 @@ export default async function DashboardPage() {
           <div className="stat"><span className="serif">{contactedIds.size}</span><span>contacted</span></div>
           <div className="stat"><span className="serif">{contacts.length}</span><span>in your network</span></div>
           <div className="stat"><span className="serif" style={{ color: dueContacts.length ? 'var(--accent)' : undefined }}>{dueContacts.length}</span><span>follow-ups due</span></div>
-          <div className="stat"><span className="serif">{upcomingChats.length}</span><span>chats coming up</span></div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))', gap: '40px 56px' }}>
-          <Section title="Up next" href="/mentors" cta="Mentors">
+          <Section title="Up next" href="/follow-ups" cta="Follow-ups">
             {upNext.length ? (
               <ul className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 {upNext.map((u) => (
@@ -171,7 +138,7 @@ export default async function DashboardPage() {
                 ))}
               </ul>
             ) : (
-              <p className="body-copy" style={{ fontSize: 14 }}>No chats or follow-ups waiting.{pending ? ` ${pending} mentor request${pending === 1 ? '' : 's'} pending.` : ''}</p>
+              <p className="body-copy" style={{ fontSize: 14 }}>No follow-ups waiting.</p>
             )}
           </Section>
 
@@ -216,20 +183,6 @@ export default async function DashboardPage() {
               </ul>
             ) : (
               <p className="body-copy" style={{ fontSize: 14 }}>Met someone at a career fair or on LinkedIn? Add them and we&apos;ll remind you to follow up.</p>
-            )}
-          </Section>
-
-          <Section title="Goals" href="/mentors" cta="Edit goals">
-            {openGoals.length ? (
-              <ul className="rows" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {openGoals.slice(0, 4).map((g) => (
-                  <li key={g.id} className="row row-tight" style={{ fontSize: 15 }}>{g.text}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="body-copy" style={{ fontSize: 14 }}>
-                {goals.length ? 'Every goal is done. Nice.' : 'Set a goal or two, like "Talk to 3 professors this month".'}
-              </p>
             )}
           </Section>
         </div>

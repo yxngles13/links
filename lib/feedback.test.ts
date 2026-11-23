@@ -18,8 +18,8 @@ test('exit prompt waits 30 seconds and then once a week', () => {
 })
 
 test('parses a full answer', () => {
-  const fb = parseFeedback(form([['rating', '4'], ['features', 'Network'], ['features', 'Mentors'], ['reason', 'Done for now'], ['comment', ' nice '], ['page', '/dashboard']]))
-  assert.deepEqual(fb, { rating: 4, features: ['Network', 'Mentors'], reason: 'Done for now', comment: 'nice', page: '/dashboard' })
+  const fb = parseFeedback(form([['rating', '4'], ['features', 'Network'], ['features', 'Plans'], ['reason', 'Done for now'], ['comment', ' nice '], ['page', '/dashboard']]))
+  assert.deepEqual(fb, { rating: 4, features: ['Network', 'Plans'], reason: 'Done for now', comment: 'nice', page: '/dashboard' })
 })
 
 test('drops made-up choices and bad values', () => {

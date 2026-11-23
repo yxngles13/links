@@ -3,11 +3,11 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { gettingStartedSteps, greeting } from './dashboard.ts'
 
-const none = { hasAbout: false, hasAnswers: false, hasActedOnMatch: false, contacts: 0, mentorRequests: 0 }
+const none = { hasAbout: false, hasAnswers: false, hasActedOnMatch: false, contacts: 0 }
 
 test('a brand-new student has every step left, answers first', () => {
   const steps = gettingStartedSteps(none)
-  assert.equal(steps.length, 5)
+  assert.equal(steps.length, 4)
   assert.equal(steps[0].key, 'answers')
   assert.ok(steps.every((s) => !s.done))
 })

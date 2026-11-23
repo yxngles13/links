@@ -35,19 +35,6 @@ export function needsFollowUp(lastInteractionAt: string | null | undefined, now 
   return now - new Date(lastInteractionAt).getTime() > FOLLOW_UP_AFTER_DAYS * DAY
 }
 
-export function formatChatTime(iso: string) {
-  // Fixed to Pacific time: every user is at CPP, and server-rendered pages
-  // would otherwise print the server's timezone.
-  return new Date(iso).toLocaleString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: 'America/Los_Angeles',
-  })
-}
-
 // "How you met" choices, shared by the in-app dialog and the extension.
 export const MET_OPTIONS = ['LinkedIn message', 'Career fair', 'Coffee chat', 'Club event', 'Class', 'Other']
 

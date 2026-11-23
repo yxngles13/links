@@ -88,6 +88,24 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .main { padding-right: var(--gutter); }
 }
 
+/* ---------- Networking: section nav on the left of the page ---------- */
+.netshell { display: flex; min-height: calc(100vh - 72px); }
+.netnav { width: 180px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid var(--line); padding: 52px 24px 64px var(--gutter); font-size: 14px; color: var(--muted); }
+.netnav a { align-self: flex-start; }
+.netnav a:hover { color: var(--ink); }
+.netnav a[aria-current="page"] { color: var(--ink); border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+.netbody { flex: 1; min-width: 0; }
+/* The section nav takes 180px, so a page's own right sidebar stacks sooner. */
+@media (max-width: 1180px) {
+  .netbody .shell { flex-direction: column; }
+  .netbody .aside { width: auto; border-left: none; border-top: 1px solid var(--line); padding: 32px var(--gutter) 48px; }
+  .netbody .main { padding-right: var(--gutter); }
+}
+@media (max-width: 960px) {
+  .netshell { flex-direction: column; }
+  .netnav { width: auto; flex-direction: row; flex-wrap: wrap; gap: 8px 24px; border-right: none; border-bottom: 1px solid var(--line); padding: 14px var(--gutter); }
+}
+
 .head-row { display: flex; flex-wrap: wrap; gap: 20px 32px; align-items: flex-end; justify-content: space-between; margin-bottom: 28px; }
 .back { font-size: 14px; color: var(--text-3); }
 .back:hover { color: var(--ink); }

@@ -1,7 +1,7 @@
 // lib/similarity.ts
 //
-// Cosine similarity in JS for the small sets (a student's contacts, the
-// mentor pool) where a pgvector RPC would be overkill. Vectors from
+// Cosine similarity in JS for small sets (a student's contacts) where a
+// pgvector RPC would be overkill. Vectors from
 // lib/embeddings.ts are already normalized, so this is just a dot product,
 // but it divides by the norms anyway in case a vector came from elsewhere.
 

@@ -21,15 +21,6 @@ const FEATURES = [
       { left: 'Marcus Webb', right: 'Career fair' },
     ],
   },
-  {
-    n: '03',
-    title: 'Mentor matching',
-    body: 'Alumni and seniors who have walked the path you are working out, matched on goals and background.',
-    rows: [
-      { left: 'Jordan Alvarez', right: "CPP '23" },
-      { left: 'Sofia Tran', right: "CPP '24" },
-    ],
-  },
 ] as const
 
 const STEPS = [
@@ -48,7 +39,6 @@ export default function LandingPage() {
         <nav className="topnav" aria-label="Main">
           <Link href="/matches">Research</Link>
           <Link href="/network">Network</Link>
-          <Link href="/mentors">Mentors</Link>
           <Link href="/login" style={{ color: 'var(--ink)' }}>Sign in</Link>
         </nav>
       </header>
@@ -60,15 +50,12 @@ export default function LandingPage() {
           Find the people who can open <em className="accent">doors</em> for you.
         </h1>
         <p style={{ margin: '32px 0 44px', fontSize: 'clamp(17px, 1.6vw, 19px)', lineHeight: 1.6, color: 'var(--text-3)', maxWidth: 560 }}>
-          Links matches you with professors, keeps track of the people you meet, and pairs you with alumni who have already done what you want to do.
+          Links matches you with professors, and keeps track of the people you meet so you never forget to follow up.
         </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 32 }}>
-          <Link href="/login" className="btn btn-lg">Student login</Link>
-          <Link href="/login?role=mentor" className="link" style={{ fontSize: 15 }}>Mentor login</Link>
-        </div>
+        <Link href="/login" className="btn btn-lg">Sign in</Link>
       </section>
 
-      {/* Three features, divided by vertical lines */}
+      {/* Features, divided by vertical lines */}
       <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', borderBottom: '1px solid var(--line)' }}>
         {FEATURES.map((f, i) => (
           <div

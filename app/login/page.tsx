@@ -1,7 +1,6 @@
 // app/login/page.tsx
 //
-// One page, two forms (sign in + sign up), toggled by ?mode=signup; ?role=mentor
-// switches the copy and where the user lands afterwards.
+// One page, two forms (sign in + sign up), toggled by ?mode=signup.
 
 import Link from 'next/link'
 import { BrandBar } from '@/components/AppNav'
@@ -11,33 +10,23 @@ import { login, signup } from './actions'
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; message?: string; mode?: string; role?: string }>
+  searchParams: Promise<{ error?: string; message?: string; mode?: string }>
 }) {
   const params = await searchParams
   const isSignup = params.mode === 'signup'
-  const isMentor = params.role === 'mentor'
-  const roleQuery = isMentor ? 'role=mentor' : ''
 
-  const heading = isMentor
-    ? isSignup
-      ? <>Share what you <em className="accent">know</em>.</>
-      : <>Welcome back, <em className="accent">mentor</em>.</>
-    : isSignup
-      ? <>Start with one <em className="accent">conversation</em>.</>
-      : <>Welcome <em className="accent">back</em>.</>
+  const heading = isSignup
+    ? <>Start with one <em className="accent">conversation</em>.</>
+    : <>Welcome <em className="accent">back</em>.</>
 
   return (
     <main>
-      <BrandBar right={isMentor ? 'Mentors' : undefined} />
+      <BrandBar />
       <div className="shell">
         <div className="main" style={{ maxWidth: 520, paddingTop: 72 }}>
           <div className="eyebrow" style={{ marginBottom: 20 }}>{isSignup ? 'Create an account' : 'Sign in'}</div>
           <h1 className="title-sm" style={{ marginBottom: 20 }}>{heading}</h1>
-          <p className="body-copy">
-            {isMentor
-              ? 'Mentor accounts see requests from CPP students and choose which ones to take.'
-              : 'Links is free for Cal Poly Pomona students and alumni.'}
-          </p>
+          <p className="body-copy">Links is free for Cal Poly Pomona students and alumni.</p>
         </div>
 
         <div className="main" style={{ borderLeft: '1px solid var(--line)', paddingTop: 72, maxWidth: 640 }}>
@@ -45,7 +34,6 @@ export default async function LoginPage({
           {params.message ? <div className="notice" style={{ marginBottom: 24 }}>{params.message}</div> : null}
 
           <form action={isSignup ? signup : login} className="form">
-            <input type="hidden" name="role" value={isMentor ? 'mentor' : 'student'} />
             {isSignup ? (
               <div className="field">
                 <label htmlFor="full_name">Full name</label>
@@ -63,9 +51,9 @@ export default async function LoginPage({
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 28, marginTop: 8 }}>
               <SubmitButton pendingText={isSignup ? 'Creating account…' : 'Signing in…'}>{isSignup ? 'Create account' : 'Sign in'}</SubmitButton>
               {isSignup ? (
-                <Link href={`/login${roleQuery ? `?${roleQuery}` : ''}`} className="link">I have an account</Link>
+                <Link href="/login" className="link">I have an account</Link>
               ) : (
-                <Link href={`/login?mode=signup${roleQuery ? `&${roleQuery}` : ''}`} className="link">Create an account</Link>
+                <Link href="/login?mode=signup" className="link">Create an account</Link>
               )}
             </div>
           </form>

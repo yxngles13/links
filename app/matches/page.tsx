@@ -1,7 +1,5 @@
 // app/matches/page.tsx
 import Link from 'next/link'
-import AppNav from '@/components/AppNav'
-import ProfileReminder from '@/components/ProfileReminder'
 import { requireUser } from '@/lib/auth'
 
 const LABEL_TEXT = { strong: 'Strong', moderate: 'Good', exploratory: 'Possible' } as const
@@ -93,8 +91,6 @@ export default async function MatchesPage() {
 
   return (
     <>
-      <AppNav active="research" />
-      <ProfileReminder />
       <div className="shell">
         <main className="main">{body}</main>
         <aside className="aside">

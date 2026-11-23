@@ -1,12 +1,12 @@
 // components/AppNav.tsx
 // Top bar: serif wordmark left, plain text links right, active link
-// underlined. Students get Home / Research / Network / Mentors / Plans / Profile; mentor accounts
-// get their own two-item nav.
+// underlined. Home / Networking / Plans / Profile (Networking holds Research,
+// Network and Follow-ups behind its own side nav).
 import Link from 'next/link'
 import CreditsBadge from '@/components/CreditsBadge'
 import FeedbackSurvey from '@/components/FeedbackSurvey'
 
-type Tab = 'home' | 'research' | 'network' | 'mentors' | 'plans' | 'profile' | 'mentor-dashboard' | 'mentor-profile'
+type Tab = 'home' | 'networking' | 'plans' | 'profile'
 
 function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
@@ -17,32 +17,16 @@ function NavLink({ href, active, children }: { href: string; active: boolean; ch
 }
 
 export default function AppNav({ active = 'home' }: { active?: Tab }) {
-  const isMentor = active === 'mentor-dashboard' || active === 'mentor-profile'
-
   return (
     <header className="topbar">
-      <Link href={isMentor ? '/mentor' : '/dashboard'} className="brand">
-        Links{isMentor ? <small>Mentor</small> : null}
-      </Link>
+      <Link href="/dashboard" className="brand">Links</Link>
       <nav className="topnav" aria-label="Main">
-        {isMentor ? (
-          <>
-            <NavLink href="/mentor" active={active === 'mentor-dashboard'}>Dashboard</NavLink>
-            <NavLink href="/mentor/profile" active={active === 'mentor-profile'}>My profile</NavLink>
-            <FeedbackSurvey />
-          </>
-        ) : (
-          <>
-            <NavLink href="/dashboard" active={active === 'home'}>Home</NavLink>
-            <NavLink href="/matches" active={active === 'research'}>Research</NavLink>
-            <NavLink href="/network" active={active === 'network'}>Network</NavLink>
-            <NavLink href="/mentors" active={active === 'mentors'}>Mentors</NavLink>
-            <NavLink href="/plans" active={active === 'plans'}>Plans</NavLink>
-            <NavLink href="/profile" active={active === 'profile'}>Profile</NavLink>
-            <FeedbackSurvey />
-            <CreditsBadge />
-          </>
-        )}
+        <NavLink href="/dashboard" active={active === 'home'}>Home</NavLink>
+        <NavLink href="/matches" active={active === 'networking'}>Networking</NavLink>
+        <NavLink href="/plans" active={active === 'plans'}>Plans</NavLink>
+        <NavLink href="/profile" active={active === 'profile'}>Profile</NavLink>
+        <FeedbackSurvey />
+        <CreditsBadge />
       </nav>
     </header>
   )

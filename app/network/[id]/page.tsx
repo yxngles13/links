@@ -1,7 +1,6 @@
 // app/network/[id]/page.tsx
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import AppNav from '@/components/AppNav'
 import DraftEditor from '@/components/DraftEditor'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser } from '@/lib/auth'
@@ -61,7 +60,6 @@ export default async function ContactPage({
 
   return (
     <>
-      <AppNav active="network" />
       <div className="shell">
         <main className="main">
           <Link href="/network" className="back">← Your network</Link>

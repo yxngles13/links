@@ -1,6 +1,6 @@
 // lib/network.ts
 // Network-tracker writes shared by the Network pages, research matches
-// ("Log this interaction") and mentor chats ("Log it").
+// ("Log this interaction") and the Chrome extension.
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { embed } from '@/lib/embeddings'
 import { spendCredit } from '@/lib/credits'
