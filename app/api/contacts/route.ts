@@ -7,32 +7,16 @@
 //
 //   GET  -> { signedIn, name, metOptions }   popup uses this to show the form or a sign-in link
 //   POST -> { id, url }                       saves a contact, same as the in-app dialog
+//
+// AI prefill from a LinkedIn profile lives in ./parse/route.ts.
 
-import { cookies } from 'next/headers'
 import { after, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
 import { displayName } from '@/lib/auth'
 import { MET_OPTIONS } from '@/lib/format'
 import { createContact, recordInteraction } from '@/lib/network'
 import { refreshContactContent } from '@/lib/generate-network-content'
 import { spendCredit } from '@/lib/credits'
-
-// The extension's requests carry Origin: chrome-extension://<id>. Anything
-// else from another site is refused, so a random page can't save contacts
-// with a signed-in user's cookie.
-function allowedOrigin(request: Request) {
-  const origin = request.headers.get('origin')
-  if (!origin) return true // same-origin GETs may omit it
-  return origin.startsWith('chrome-extension://') || origin === new URL(request.url).origin
-}
-
-async function getUser() {
-  const supabase = createClient(await cookies())
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  return { supabase, user }
-}
+import { allowedOrigin, getUser } from '@/lib/extension-api'
 
 export async function GET(request: Request) {
   if (!allowedOrigin(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

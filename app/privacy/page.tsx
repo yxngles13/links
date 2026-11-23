@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Privacy policy · Links' }
 
-const UPDATED = 'October 19, 2026'
+const UPDATED = 'November 23, 2026'
 const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -44,11 +44,13 @@ export default function PrivacyPage() {
       <Section title="The Chrome extension">
         <p style={{ margin: 0 }}>
           The extension only does something when you click its icon. If the open tab is a LinkedIn profile (linkedin.com/in/…), it reads that
-          page&apos;s name, headline and address to fill in the form for you. It doesn&apos;t read any other page, and it doesn&apos;t run in the background.
+          page&apos;s visible text and sends it to Links, which uses Groq to pick out the person&apos;s name, role, company, school, location, past roles
+          and a short summary, and fills in the form for you. The page text isn&apos;t kept. It doesn&apos;t read any other page, and it doesn&apos;t run in the
+          background.
         </p>
         <p style={{ margin: 0 }}>
-          Nothing is sent until you press Save. Then the form is sent to your Links account, using your existing Links sign-in in that browser.
-          While you type, an unsaved draft is kept in the browser&apos;s temporary extension storage and cleared when you save or close the browser.
+          Nothing is saved until you press Save. Then the form is sent to your Links account, using your existing Links sign-in in that browser.
+          While you type, an unsaved draft, and the details already read from the profile you&apos;re on, are kept in the browser&apos;s temporary extension storage and cleared when you save or close the browser.
         </p>
       </Section>
 
@@ -58,7 +60,8 @@ export default function PrivacyPage() {
           <li><strong>Vercel</strong> hosts the website and runs its server code.</li>
           <li>
             <strong>Groq</strong> generates match explanations, summaries, questions and draft messages. To do that, Links sends it the relevant
-            profile details, contact details and notes. Matching itself runs on our own server.
+            profile details, contact details and notes. It also reads LinkedIn profiles you ask the extension to fill in. Matching itself runs on our
+            own server.
           </li>
         </ul>
         <p style={{ margin: 0 }}>Links has no ads, no analytics trackers, and never sells or shares your data for marketing.</p>

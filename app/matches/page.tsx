@@ -1,6 +1,7 @@
 // app/matches/page.tsx
 import Link from 'next/link'
 import { requireUser } from '@/lib/auth'
+import { displayScore } from '@/lib/similarity'
 
 const LABEL_TEXT = { strong: 'Strong', moderate: 'Good', exploratory: 'Possible' } as const
 
@@ -21,6 +22,9 @@ export default async function MatchesPage() {
         <h1 className="title" style={{ marginBottom: 16 }}>Your matches</h1>
         <p className="body-copy" style={{ marginBottom: 24 }}>You need a profile before we can find matches.</p>
         <Link href="/profile#matching" className="btn btn-lg">Set up your profile</Link>
+        <p className="body-copy" style={{ marginTop: 24 }}>
+          <Link href="/professors" className="link">Or browse all professors →</Link>
+        </p>
       </>
     )
   } else {
@@ -44,6 +48,9 @@ export default async function MatchesPage() {
           <p className="body-copy">
             No matches yet. <Link href="/profile#matching" className="link">Update your profile</Link> to generate some.
           </p>
+          <p className="body-copy" style={{ marginTop: 16 }}>
+            <Link href="/professors" className="link">Or browse all professors →</Link>
+          </p>
         </>
       )
     } else {
@@ -59,7 +66,7 @@ export default async function MatchesPage() {
             {matches.map((m, i) => {
               const opp = m.opportunities as Opportunity | null
               const fit = (m.compatibility_label ?? 'exploratory') as keyof typeof LABEL_TEXT
-              const tags = [contactedIds.has(m.opportunity_id) && 'Contacted', m.saved_at && 'Saved'].filter(Boolean).join(' · ')
+              const tags = [m.picked_at && 'You picked', contactedIds.has(m.opportunity_id) && 'Contacted', m.saved_at && 'Saved'].filter(Boolean).join(' · ')
               return (
                 <li key={m.id}>
                   <Link href={`/matches/${m.id}`} className="row" style={{ display: 'flex', gap: 28, padding: '26px 0' }}>
@@ -73,9 +80,9 @@ export default async function MatchesPage() {
                       {tags ? <div className="num" style={{ marginTop: 10 }}>{tags}</div> : null}
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      {/* Raw cosine similarity as 0–100; see the note on scores. */}
+                      {/* Display score, not raw cosine; see displayScore in lib/similarity.ts. */}
                       <div className="serif" style={{ fontSize: 44, lineHeight: 1, color: i === 0 ? 'var(--accent)' : fit === 'exploratory' ? '#888' : undefined }}>
-                        {Math.round((m.similarity_score ?? 0) * 100)}
+                        {displayScore(m.similarity_score ?? 0)}
                       </div>
                       <div className="label" style={{ marginTop: 6 }}>{LABEL_TEXT[fit] ?? 'Match'}</div>
                     </div>

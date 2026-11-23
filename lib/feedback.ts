@@ -3,7 +3,7 @@
 // Pure pieces of the exit / "Feedback" survey: the choices, when to show it,
 // and form parsing. No `@/` imports so `npm test` can run this directly.
 
-export const FEEDBACK_FEATURES = ['Research matches', 'Network', 'Plans', 'Profile', 'Just looking around'] as const
+export const FEEDBACK_FEATURES = ['Professors', 'Matches', 'Network', 'Follow-ups', 'Profile', 'Just looking around'] as const
 export const FEEDBACK_REASONS = [
   'Done for now',
   "Couldn't find what I needed",

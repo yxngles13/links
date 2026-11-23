@@ -3,10 +3,12 @@
 // (follow-ups), and one highlight per area linking into it.
 import Link from 'next/link'
 import AppNav from '@/components/AppNav'
+import ExtensionCard from '@/components/ExtensionCard'
 import ProfileReminder from '@/components/ProfileReminder'
 import { displayName, requireUser } from '@/lib/auth'
 import { gettingStartedSteps, greeting } from '@/lib/dashboard'
 import { needsFollowUp, timeAgo } from '@/lib/format'
+import { displayScore } from '@/lib/similarity'
 import { getPublicProfile } from '@/lib/student-profile'
 
 type Match = {
@@ -67,8 +69,10 @@ export default async function DashboardPage() {
     hasAnswers: !!student,
     hasActedOnMatch: saved > 0 || contactedIds.size > 0,
     contacts: contacts.length,
+    hasMatches: matches.length > 0,
   })
   const doneCount = steps.filter((s) => s.done).length
+  const chromeUrl = process.env.NEXT_PUBLIC_CHROME_EXTENSION_URL
   const firstName = (profile?.full_name || displayName(user)).split(' ')[0]
 
   // "Up next": people waiting on a follow-up, longest wait first.
@@ -92,6 +96,9 @@ export default async function DashboardPage() {
         <p className="meta" style={{ marginBottom: 36 }}>
           {upNext.length ? `${upNext.length} thing${upNext.length === 1 ? '' : 's'} need${upNext.length === 1 ? 's' : ''} you this week.` : 'Nothing urgent. A good day to reach out to someone new.'}
         </p>
+
+        {/* Hidden until NEXT_PUBLIC_CHROME_EXTENSION_URL is set to the Web Store listing. */}
+        {chromeUrl ? <ExtensionCard storeUrl={chromeUrl} /> : null}
 
         {doneCount < steps.length ? (
           <section aria-labelledby="start-title" style={{ marginBottom: 48 }}>
@@ -154,14 +161,15 @@ export default async function DashboardPage() {
                           {[m.opportunities?.lab_name ?? m.opportunities?.department, contactedIds.has(m.opportunity_id) && 'Contacted', m.saved_at && 'Saved'].filter(Boolean).join(' · ')}
                         </span>
                       </span>
-                      <span className="serif" style={{ fontSize: 28 }}>{Math.round((m.similarity_score ?? 0) * 100)}</span>
+                      <span className="serif" style={{ fontSize: 28 }}>{displayScore(m.similarity_score ?? 0)}</span>
                     </Link>
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="body-copy" style={{ fontSize: 14 }}>
-                {student ? 'No matches yet.' : 'Answer a few questions and your professor matches show up here.'}
+                {student ? 'No matches yet.' : 'Answer a few questions and your professor matches show up here.'}{' '}
+                <Link href="/professors" className="link">Browse all professors</Link>
               </p>
             )}
           </Section>

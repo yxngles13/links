@@ -1,7 +1,7 @@
 // lib/profile.test.ts — run with `npm test`.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { githubUrl, matchesFileType, linkedinUrl, parsePromptAnswers, staleMatchIds, validateUpload } from './profile.ts'
+import { githubUrl, isMissingColumn, matchesFileType, linkedinUrl, parsePromptAnswers, staleMatchIds, validateUpload } from './profile.ts'
 
 test('keeps at most 3 answers', () => {
   const out = parsePromptAnswers(['problem', 'rabbit_hole', 'ask_me', 'learning'], ['a', 'b', 'c', 'd'])
@@ -54,4 +54,20 @@ test('file contents must match the claimed type', () => {
   assert.equal(matchesFileType(new TextEncoder().encode('<svg'), 'application/pdf'), false)
   assert.equal(matchesFileType(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), 'image/jpeg'), true)
   assert.equal(matchesFileType(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), 'image/png'), false)
+})
+
+test('picked matches are never stale', () => {
+  const rows = [
+    { id: '1', opportunity_id: 'a', saved_at: null, picked_at: '2026-11-23T10:00:00Z' },
+    { id: '2', opportunity_id: 'b', saved_at: null, picked_at: null },
+    { id: '3', opportunity_id: 'c', saved_at: null },
+  ]
+  assert.deepEqual(staleMatchIds(rows, new Set()), ['2', '3'])
+})
+
+test('missing column errors are recognised', () => {
+  assert.equal(isMissingColumn({ code: '42703' }), true)
+  assert.equal(isMissingColumn({ message: 'column match_recommendations.picked_at does not exist' }), true)
+  assert.equal(isMissingColumn({ code: 'PGRST205' }), false)
+  assert.equal(isMissingColumn(null), false)
 })

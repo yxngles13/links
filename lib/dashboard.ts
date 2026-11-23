@@ -9,6 +9,7 @@ export type StartFacts = {
   hasAnswers: boolean // matching questions answered
   hasActedOnMatch: boolean // saved or contacted at least one professor
   contacts: number
+  hasMatches: boolean // matching has recommended at least one professor
 }
 
 export type StartStep = { key: string; title: string; why: string; href: string; cta: string; done: boolean }
@@ -19,7 +20,7 @@ export function gettingStartedSteps(f: StartFacts): StartStep[] {
   return [
     { key: 'answers', title: 'Tell us what you want to work on', why: 'Two minutes of questions, and we match you with professors.', href: '/profile#matching', cta: 'Answer questions', done: f.hasAnswers },
     { key: 'about', title: 'Make your profile yours', why: 'A headline and a few quick answers, so people know who they’re talking to.', href: '/profile', cta: 'Edit profile', done: f.hasAbout },
-    { key: 'match', title: 'Save or contact a professor', why: 'Each match comes with a draft email you can send.', href: '/matches', cta: 'See matches', done: f.hasActedOnMatch },
+    { key: 'match', title: 'Save or contact a professor', why: 'Each match comes with a draft email you can send.', href: f.hasMatches ? '/matches' : '/professors', cta: f.hasMatches ? 'See matches' : 'Browse professors', done: f.hasActedOnMatch },
     { key: 'network', title: 'Add someone you’ve met', why: 'We remind you when it’s time to follow up.', href: '/network?add=1', cta: 'Add a contact', done: f.contacts > 0 },
   ]
 }

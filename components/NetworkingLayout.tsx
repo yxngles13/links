@@ -1,15 +1,16 @@
 // components/NetworkingLayout.tsx
 // The Networking tab: top bar, profile reminder, and a left section nav
-// (Research / Network / Follow-ups) beside the page. Each section's
+// (Professors / Matches / Network / Follow-ups) beside the page. Each section's
 // layout.tsx renders this, so the pages themselves only render their content.
 import Link from 'next/link'
 import AppNav from '@/components/AppNav'
 import ProfileReminder from '@/components/ProfileReminder'
 
-export type NetworkingSection = 'research' | 'network' | 'follow-ups'
+export type NetworkingSection = 'professors' | 'matches' | 'network' | 'follow-ups'
 
 const SECTIONS: { id: NetworkingSection; href: string; label: string }[] = [
-  { id: 'research', href: '/matches', label: 'Research' },
+  { id: 'professors', href: '/professors', label: 'Professors' },
+  { id: 'matches', href: '/matches', label: 'Matches' },
   { id: 'network', href: '/network', label: 'Network' },
   { id: 'follow-ups', href: '/follow-ups', label: 'Follow-ups' },
 ]

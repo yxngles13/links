@@ -1,12 +1,12 @@
 // components/AppNav.tsx
 // Top bar: serif wordmark left, plain text links right, active link
-// underlined. Home / Networking / Plans / Profile (Networking holds Research,
-// Network and Follow-ups behind its own side nav).
+// underlined. Home / Networking / Profile (Networking holds Professors,
+// Matches, Network and Follow-ups behind its own side nav).
 import Link from 'next/link'
 import CreditsBadge from '@/components/CreditsBadge'
 import FeedbackSurvey from '@/components/FeedbackSurvey'
 
-type Tab = 'home' | 'networking' | 'plans' | 'profile'
+type Tab = 'home' | 'networking' | 'profile'
 
 function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
@@ -22,8 +22,7 @@ export default function AppNav({ active = 'home' }: { active?: Tab }) {
       <Link href="/dashboard" className="brand">Links</Link>
       <nav className="topnav" aria-label="Main">
         <NavLink href="/dashboard" active={active === 'home'}>Home</NavLink>
-        <NavLink href="/matches" active={active === 'networking'}>Networking</NavLink>
-        <NavLink href="/plans" active={active === 'plans'}>Plans</NavLink>
+        <NavLink href="/professors" active={active === 'networking'}>Networking</NavLink>
         <NavLink href="/profile" active={active === 'profile'}>Profile</NavLink>
         <FeedbackSurvey />
         <CreditsBadge />

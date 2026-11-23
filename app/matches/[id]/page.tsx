@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import DraftEditor from '@/components/DraftEditor'
 import SubmitButton from '@/components/SubmitButton'
 import { requireUser } from '@/lib/auth'
+import { displayScore } from '@/lib/similarity'
 import { logMatchInteraction, rewriteOutreachDraft, saveOutreachDraft, toggleSaved } from '../actions'
 
 const LABEL_TEXT = { strong: 'Strong match', moderate: 'Good match', exploratory: 'Possible match' } as const
@@ -56,7 +57,7 @@ export default async function MatchDetailPage({
         <main className="main">
           <Link href="/matches" className="back">← All matches</Link>
           <div className="eyebrow accent" style={{ margin: '22px 0 10px' }}>
-            {Math.round((match.similarity_score ?? 0) * 100)} · {LABEL_TEXT[fit]}
+            {displayScore(match.similarity_score ?? 0)} · {LABEL_TEXT[fit]}
           </div>
           <h1 className="title-sm" style={{ marginBottom: 4 }}>{opp?.professor_name}</h1>
           <div className="meta" style={{ marginBottom: 28 }}>{[opp?.lab_name, opp?.department].filter(Boolean).join(' · ')}</div>

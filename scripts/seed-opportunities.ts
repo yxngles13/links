@@ -35,8 +35,8 @@ const supabase = createClient(
 // "Contact the professor to confirm current availability") instead of
 // implying you know something you don't. If you email a few professors
 // directly later, fill in their real values and flip is_available as
-// appropriate — everything below defaults to true only because the page
-// doesn't say otherwise, not because it's confirmed.
+// appropriate. Everything below is false ("Ask to confirm") because the
+// page doesn't say; see supabase/migrations/20261124000000_professor_browse.sql.
 const opportunities = [
   {
     professor_name: 'Dr. Abdelfattah Amamra',
@@ -48,7 +48,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -62,7 +62,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -76,7 +76,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml', 'https://www.cpp.edu/sci/computer-science/student-labs/research-labs.shtml'],
   },
@@ -90,7 +90,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml', 'https://www.cpp.edu/sci/computer-science/student-labs/research-labs.shtml'],
   },
@@ -104,7 +104,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml', 'https://www.cpp.edu/sci/computer-science/student-labs/research-labs.shtml'],
   },
@@ -118,7 +118,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -132,7 +132,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml', 'https://www.cpp.edu/sci/computer-science/student-labs/research-labs.shtml', 'https://www.cpp.edu/calsys/index.shtml'],
   },
@@ -146,7 +146,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -160,7 +160,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -174,7 +174,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -188,7 +188,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -202,7 +202,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml', 'https://www.cpp.edu/sci/computer-science/student-labs/research-labs.shtml'],
   },
@@ -216,7 +216,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -230,7 +230,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml', 'https://www.cpp.edu/sci/computer-science/student-labs/research-labs.shtml'],
   },
@@ -244,7 +244,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -258,7 +258,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -272,7 +272,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
@@ -286,14 +286,14 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/faculty-and-staff/faculty-research-int.shtml'],
   },
   {
-    // Not on the faculty expertise page as of this writing — found only via
-    // the research labs page. Worth double-checking this professor is
-    // actually current CS faculty before treating this as fully reliable.
+    // Not on the faculty expertise page — research areas come from the
+    // research labs page. Listed as an Assistant Professor on the
+    // department's Permanent Faculty page (checked 2026-11-23).
     professor_name: 'Dr. Kosaraju',
     department: 'Computer Science',
     lab_name: 'AI&ML-X Lab',
@@ -303,7 +303,7 @@ const opportunities = [
     desired_skills: [],
     prerequisites: null,
     time_commitment_hours: null,
-    is_available: true,
+    is_available: false,
     preferred_contact_method: 'email',
     public_resources: ['https://www.cpp.edu/sci/computer-science/student-labs/research-labs.shtml'],
   },
@@ -336,7 +336,20 @@ function toEmbeddingText(o: (typeof opportunities)[number]): string {
 }
 
 async function main() {
+  // Safe to re-run: professors already in the table (by name) are skipped,
+  // so only new entries get inserted.
+  const { data: existing, error: existingError } = await supabase.from('opportunities').select('professor_name')
+  if (existingError) {
+    console.error('Could not read existing professors:', existingError.message)
+    return
+  }
+  const have = new Set((existing ?? []).map((r) => r.professor_name as string))
+
   for (const o of opportunities) {
+    if (have.has(o.professor_name)) {
+      console.log(`Skipped ${o.professor_name} (exists)`)
+      continue
+    }
     const embedding = await embed(toEmbeddingText(o))
 
     const { error } = await supabase.from('opportunities').insert({

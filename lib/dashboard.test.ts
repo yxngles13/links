@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { gettingStartedSteps, greeting } from './dashboard.ts'
 
-const none = { hasAbout: false, hasAnswers: false, hasActedOnMatch: false, contacts: 0 }
+const none = { hasAbout: false, hasAnswers: false, hasActedOnMatch: false, contacts: 0, hasMatches: false }
 
 test('a brand-new student has every step left, answers first', () => {
   const steps = gettingStartedSteps(none)
@@ -22,4 +22,9 @@ test('greeting follows Pacific time', () => {
   assert.equal(greeting(new Date('2026-10-19T22:00:00Z')), 'Good afternoon') // 3pm
   assert.equal(greeting(new Date('2026-10-20T03:00:00Z')), 'Good evening') // 8pm
   assert.equal(greeting(new Date('2026-10-20T09:00:00Z')), 'Up late') // 2am
+})
+
+test('the professor step sends students without matches to browse', () => {
+  assert.equal(gettingStartedSteps(none).find((s) => s.key === 'match')?.href, '/professors')
+  assert.equal(gettingStartedSteps({ ...none, hasMatches: true }).find((s) => s.key === 'match')?.href, '/matches')
 })

@@ -9,7 +9,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { embed } from '@/lib/embeddings'
 import { generateMatchContent } from '@/lib/generate-match-content'
-import { staleMatchIds, type PromptAnswer } from '@/lib/profile'
+import { isMissingColumn, staleMatchIds, type PromptAnswer } from '@/lib/profile'
+import { pickedContent } from '@/lib/professors'
+import { parseVector, scoreFor } from '@/lib/similarity'
 
 type StudentProfile = {
   id: string
@@ -51,10 +53,10 @@ function toCompatibilityLabel(similarity: number): 'strong' | 'moderate' | 'expl
   return 'exploratory'
 }
 
-export async function generateMatchesForStudent(studentProfileId: string, supabase: SupabaseClient) {
+async function loadStudent(supabase: SupabaseClient, studentProfileId: string) {
   const { data: profile, error: profileError } = await supabase
     .from('student_profiles')
-    .select('id, user_id, major, academic_year, coursework, technical_skills, research_interests, career_goals')
+    .select('id, user_id, major, academic_year, coursework, technical_skills, research_interests, career_goals, profile_embedding')
     .eq('id', studentProfileId)
     .single()
 
@@ -70,8 +72,11 @@ export async function generateMatchesForStudent(studentProfileId: string, supaba
     .select('headline, prompts')
     .eq('user_id', profile.user_id)
     .maybeSingle()
-  const student = { ...profile, headline: about?.headline ?? null, prompts: (about?.prompts ?? []) as PromptAnswer[] }
+  return { ...profile, headline: about?.headline ?? null, prompts: (about?.prompts ?? []) as PromptAnswer[] }
+}
 
+export async function generateMatchesForStudent(studentProfileId: string, supabase: SupabaseClient) {
+  const student = await loadStudent(supabase, studentProfileId)
   const embedding = await embed(toEmbeddingText(student))
 
   // Cache the student's own embedding so it doesn't need to be
@@ -131,7 +136,8 @@ export async function generateMatchesForStudent(studentProfileId: string, supaba
   // dropped out of the new results are removed instead of piling up with
   // stale scores. Saved and contacted ones stay.
   const [{ data: existing, error: existingError }, { data: contacted, error: contactedError }] = await Promise.all([
-    supabase.from('match_recommendations').select('id, opportunity_id, saved_at').eq('student_profile_id', studentProfileId),
+    // `*` so picked_at comes through once its migration has run.
+    supabase.from('match_recommendations').select('*').eq('student_profile_id', studentProfileId),
     supabase.from('interactions').select('opportunity_id').eq('student_profile_id', studentProfileId),
   ])
   // If either lookup fails, skip pruning: guessing could delete a contacted match.
@@ -147,4 +153,80 @@ export async function generateMatchesForStudent(studentProfileId: string, supaba
   }
 
   return rows
+}
+// "Write me a draft" on a professor from the Professors tab: make them one
+// of the student's matches even if matching didn't pick them. picked_at
+// keeps the row through later re-matches. When `generate` is false (out of
+// credits) the row is still created, just without the AI text, and a
+// professor who was already a match keeps the text they had.
+export async function pickOpportunity(
+  supabase: SupabaseClient,
+  studentProfileId: string,
+  opportunityId: string,
+  opts: { generate: boolean }
+): Promise<{ matchId: string; wrote: boolean } | { error: 'setup' | 'not_found' }> {
+  const [student, { data: opp }, { data: existing }] = await Promise.all([
+    loadStudent(supabase, studentProfileId),
+    supabase
+      .from('opportunities')
+      .select('id, professor_name, department, lab_name, project_description, opportunity_embedding')
+      .eq('id', opportunityId)
+      .maybeSingle(),
+    supabase
+      .from('match_recommendations')
+      .select('explanation, suggested_questions, outreach_draft')
+      .eq('student_profile_id', studentProfileId)
+      .eq('opportunity_id', opportunityId)
+      .maybeSingle(),
+  ])
+  if (!opp) return { error: 'not_found' }
+
+  // Profiles saved before embeddings existed (or whose matching failed)
+  // have no vector yet: embed once and keep it. If the model can't load,
+  // the pick still goes through with a score of 0.
+  let profileVec = parseVector(student.profile_embedding)
+  if (!profileVec) {
+    try {
+      profileVec = await embed(toEmbeddingText(student))
+      await supabase
+        .from('student_profiles')
+        .update({ profile_embedding: profileVec, updated_at: new Date().toISOString() })
+        .eq('id', studentProfileId)
+    } catch (err) {
+      console.error('Could not embed profile for a pick:', err)
+    }
+  }
+  const similarity = profileVec ? scoreFor(profileVec, opp.opportunity_embedding) : 0
+
+  // A Groq error (rate limit, network) shouldn't lose the click: the match
+  // is still created and the student is told the draft didn't get written.
+  let generated = null
+  if (opts.generate) {
+    try {
+      generated = await generateMatchContent(student, opp)
+    } catch (err) {
+      console.error(`Could not generate a draft for ${opp.professor_name}:`, err)
+    }
+  }
+  const { content, wrote } = pickedContent(generated, existing)
+
+  const { data: row, error } = await supabase
+    .from('match_recommendations')
+    .upsert(
+      {
+        student_profile_id: studentProfileId,
+        opportunity_id: opportunityId,
+        similarity_score: similarity,
+        compatibility_label: toCompatibilityLabel(similarity),
+        ...content,
+        picked_at: new Date().toISOString(),
+      },
+      { onConflict: 'student_profile_id,opportunity_id' }
+    )
+    .select('id')
+    .single()
+
+  if (isMissingColumn(error)) return { error: 'setup' }
+  if (error || !row) throw new Error(`Could not save picked match: ${error?.message}`)
+  return { matchId: row.id as string, wrote }
 }

@@ -58,13 +58,19 @@ export const githubUrl = (v: unknown) => siteUrl(v, /^(www\.)?github\.com$/i)
 export const linkedinUrl = (v: unknown) => siteUrl(v, /^([a-z]+\.)?linkedin\.com$/i)
 
 // After matching re-runs, rows for professors that fell out of the new top
-// results are removed, unless the student saved them. Contacted ones are
-// passed in as part of keepOpportunityIds.
+// results are removed, unless the student saved them or picked them from
+// Professors. Contacted ones are passed in as part of keepOpportunityIds.
 export function staleMatchIds(
-  rows: { id: string; opportunity_id: string; saved_at: string | null }[],
+  rows: { id: string; opportunity_id: string; saved_at: string | null; picked_at?: string | null }[],
   keepOpportunityIds: Set<string>
 ): string[] {
-  return rows.filter((r) => !r.saved_at && !keepOpportunityIds.has(r.opportunity_id)).map((r) => r.id)
+  return rows.filter((r) => !r.saved_at && !r.picked_at && !keepOpportunityIds.has(r.opportunity_id)).map((r) => r.id)
+}
+
+// A column a migration adds (e.g. match_recommendations.picked_at) that
+// hasn't been run yet: Postgres says 42703, PostgREST says it can't find it.
+export function isMissingColumn(error: { code?: string; message?: string } | null | undefined) {
+  return !!error && (error.code === '42703' || /column .* does not exist|could not find the .* column/i.test(error.message ?? ''))
 }
 
 const MB = 1024 * 1024
